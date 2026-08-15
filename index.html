@@ -13,6 +13,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <!-- Supabase JS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Leaflet CSS & JS for Interactive Map Pickers & Live Tracking -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link rel="stylesheet" href="style.css" />
 
   <!-- Structured Data -->
@@ -293,45 +296,48 @@
           <h2 class="section-title">Delivery Process</h2>
           <p class="section-desc">Simple steps from order to doorstep delivery</p>
         </div>
-        <div class="process-steps">
-          <div class="process-step reveal">
-            <div class="ps-num">01</div>
-            <div class="ps-icon">📱</div>
-            <h3>Order Material</h3>
-            <p>Select your construction material and place your order online</p>
-            <div class="ps-connector"></div>
+        <div class="process-single-box glass">
+          <div class="pbox-steps">
+            <div class="pbox-step">
+              <div class="pbox-icon">📱</div>
+              <div class="pbox-text">
+                <span class="pbox-num">01</span>
+                <strong>Order Material</strong>
+              </div>
+            </div>
+            <div class="pbox-arrow">➔</div>
+            <div class="pbox-step">
+              <div class="pbox-icon">✅</div>
+              <div class="pbox-text">
+                <span class="pbox-num">02</span>
+                <strong>Confirmed</strong>
+              </div>
+            </div>
+            <div class="pbox-arrow">➔</div>
+            <div class="pbox-step">
+              <div class="pbox-icon">⚙️</div>
+              <div class="pbox-text">
+                <span class="pbox-num">03</span>
+                <strong>Loaded</strong>
+              </div>
+            </div>
+            <div class="pbox-arrow">➔</div>
+            <div class="pbox-step">
+              <div class="pbox-icon">🚛</div>
+              <div class="pbox-text">
+                <span class="pbox-num">04</span>
+                <strong>On Way</strong>
+              </div>
+            </div>
+            <div class="pbox-arrow">➔</div>
+            <div class="pbox-step">
+              <div class="pbox-icon">🏠</div>
+              <div class="pbox-text">
+                <span class="pbox-num">05</span>
+                <strong>Delivered</strong>
+              </div>
+            </div>
           </div>
-          <div class="process-step reveal">
-            <div class="ps-num">02</div>
-            <div class="ps-icon">✅</div>
-            <h3>Order Confirmed</h3>
-            <p>Admin confirms your order and schedules delivery</p>
-            <div class="ps-connector"></div>
-          </div>
-          <div class="process-step reveal">
-            <div class="ps-num">03</div>
-            <div class="ps-icon">⚙️</div>
-            <h3>Material Loaded</h3>
-            <p>Materials are prepared, measured and loaded on vehicle</p>
-            <div class="ps-connector"></div>
-          </div>
-          <div class="process-step reveal">
-            <div class="ps-num">04</div>
-            <div class="ps-icon">🚛</div>
-            <h3>Out for Delivery</h3>
-            <p>Truck / tractor travels to your construction site</p>
-            <div class="ps-connector"></div>
-          </div>
-          <div class="process-step reveal">
-            <div class="ps-num">05</div>
-            <div class="ps-icon">🏠</div>
-            <h3>Delivered!</h3>
-            <p>Materials arrive at your location — ready to build!</p>
-          </div>
-        </div>
-        <div class="process-vehicle-anim">
-          <div class="road-line"></div>
-          <div class="moving-truck">🚛</div>
         </div>
       </div>
     </div>
@@ -339,27 +345,8 @@
     <!-- ABOUT SECTION -->
     <div class="section about-section reveal" id="about-anchor">
       <div class="container">
-        <div class="about-grid">
-          <div class="about-visual reveal-left">
-            <div class="about-visual-inner">
-              <div class="about-construction-art">
-                <div class="aca-item brick1">🧱</div>
-                <div class="aca-item sand1">🏔️</div>
-                <div class="aca-item truck1">🚛</div>
-                <div class="aca-item tractor1">🚜</div>
-                <div class="aca-item water1">🚰</div>
-                <div class="aca-item house1">🏗️</div>
-              </div>
-              <div class="about-badge-float">
-                <span>🌟</span>
-                <div>
-                  <strong>Premium Quality</strong>
-                  <small>Guaranteed</small>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="about-content reveal-right">
+        <div class="about-grid about-centered">
+          <div class="about-content">
             <div class="section-tag">About Us</div>
             <h2 class="section-title">About Ravikumar House Materials</h2>
             <p>We are a dedicated construction materials supply and delivery business committed to providing the highest quality building materials for your home construction and building projects.</p>
@@ -568,6 +555,41 @@
             <h3>Delivery Information</h3>
             <form id="checkoutForm" onsubmit="placeOrder(event)">
               <div class="form-row">
+                <div class="form-group">
+                  <label>Full Name *</label>
+                  <input type="text" id="co-name" placeholder="Enter your full name" required />
+                </div>
+                <div class="form-group">
+              <div class="checkout-address-header">
+                <h3>Choose Delivery Address</h3>
+                <button type="button" class="btn btn-outline btn-sm" onclick="openAddressModal()">➕ Add New Address / Pin Location</button>
+              </div>
+
+              <!-- Saved Addresses List (Amazon / Flipkart Style) -->
+              <div class="checkout-saved-addresses" id="checkoutSavedAddresses">
+                <!-- Injected by JS -->
+              </div>
+
+              <!-- Hidden Location Snapshot Fields -->
+              <input type="hidden" id="co-selected-addr-id" />
+              <input type="hidden" id="co-lat" value="16.9833" />
+              <input type="hidden" id="co-lng" value="79.5667" />
+              <input type="hidden" id="co-gmaps-url" />
+
+              <!-- Delivery Location Map Preview -->
+              <div class="checkout-map-preview-box glass">
+                <div class="cmp-header">
+                  <span>📍 Site Location Pin Preview</span>
+                  <small id="cmpCoords">Lat: 16.9833, Lng: 79.5667</small>
+                </div>
+                <div id="checkoutMapPreview" class="cmp-map"></div>
+                <div class="cmp-footer">
+                  <span id="cmpAddressSummary">Miryalaguda, Telangana</span>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="openAddressModal(getSelectedCheckoutAddressId())">✏️ Adjust Pin / Edit</button>
+                </div>
+              </div>
+
+              <div class="form-row" style="margin-top:1.5rem">
                 <div class="form-group">
                   <label>Full Name *</label>
                   <input type="text" id="co-name" placeholder="Enter your full name" required />
@@ -1068,6 +1090,170 @@
     <button class="btn btn-link btn-full" onclick="closeGuestAuthModal()" style="margin-top:0.75rem;color:rgba(255,255,255,0.6);font-size:0.85rem">
       Continue as Guest →
     </button>
+  </div>
+</div>
+
+<!-- ===================== ADD PRODUCT MODAL ===================== -->
+<div class="modal-overlay" id="addProductModal" onclick="closeAddProductModal(event)">
+  <div class="add-product-card glass">
+    <div class="apm-header">
+      <h2>➕ Add New Construction Material</h2>
+      <button class="pm-close" onclick="closeAddProductModal(null, true)">✕</button>
+    </div>
+    <form onsubmit="addNewProductSubmit(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Material Name *</label>
+          <input type="text" id="np-name" placeholder="e.g. M-Sand / River Sand" required />
+        </div>
+        <div class="form-group">
+          <label>Category *</label>
+          <select id="np-cat" required>
+            <option value="sand">Sand & Dust</option>
+            <option value="aggregate">Aggregates / Kankara</option>
+            <option value="brick">Bricks & Blocks</option>
+            <option value="service">Service / Tanker</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Price (₹) *</label>
+          <input type="number" id="np-price" placeholder="e.g. 2500" min="1" required />
+        </div>
+        <div class="form-group">
+          <label>Unit *</label>
+          <select id="np-unit" required>
+            <option value="Load">Load</option>
+            <option value="Piece">Piece</option>
+            <option value="Trip">Trip</option>
+            <option value="Ton">Ton</option>
+            <option value="Bag">Bag</option>
+            <option value="Sq.Ft">Sq.Ft</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Initial Stock Qty</label>
+          <input type="number" id="np-stock" value="50" min="1" />
+        </div>
+        <div class="form-group">
+          <label>Emoji Icon</label>
+          <input type="text" id="np-emoji" value="🧱" placeholder="e.g. 🏔️, 🧱, 🪨" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Image Filename or URL (Optional)</label>
+        <input type="text" id="np-img" placeholder="e.g. sand.jpg or https://..." />
+      </div>
+      <div class="form-group">
+        <label>Description *</label>
+        <textarea id="np-desc" rows="2" placeholder="Brief material description..." required></textarea>
+      </div>
+      <div class="apm-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeAddProductModal(null, true)">Cancel</button>
+        <button type="submit" class="btn btn-primary">➕ Add Material to Store</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== ADDRESS MANAGEMENT & MAP PICKER MODAL ===================== -->
+<div class="modal-overlay" id="addressModal" onclick="closeAddressModal(event)">
+  <div class="address-modal-card glass">
+    <div class="apm-header">
+      <h2>📍 Save Delivery Address &amp; Pin Location</h2>
+      <button type="button" class="pm-close" onclick="closeAddressModal(null, true)">✕</button>
+    </div>
+    
+    <!-- Map Location Picker -->
+    <div class="map-picker-section">
+      <div class="map-toolbar">
+        <button type="button" class="btn btn-primary btn-sm" onclick="useCurrentLocation()">
+          <span>🎯</span> Use Current GPS Location
+        </button>
+        <span class="map-hint">Click or drag marker 📍 on map to select exact site location</span>
+      </div>
+      <div id="addressMapPicker" class="map-picker-box"></div>
+      <div class="coords-bar" id="coordsBar">
+        <span>Latitude: <strong id="lblLat">16.9833</strong></span>
+        <span>Longitude: <strong id="lblLng">79.5667</strong></span>
+      </div>
+    </div>
+
+    <form id="addressForm" onsubmit="handleSaveAddress(event)">
+      <input type="hidden" id="addr-id" />
+      <input type="hidden" id="addr-lat" value="16.9833" />
+      <input type="hidden" id="addr-lng" value="79.5667" />
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>Recipient Full Name *</label>
+          <input type="text" id="addr-name" placeholder="Recipient name" required />
+        </div>
+        <div class="form-group">
+          <label>Phone Number *</label>
+          <input type="tel" id="addr-phone" placeholder="10-digit mobile number" required />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>House / Flat / Door No. *</label>
+          <input type="text" id="addr-house" placeholder="e.g. House No. 12-34, Flat 4B" required />
+        </div>
+        <div class="form-group">
+          <label>Street / Area / Colony *</label>
+          <input type="text" id="addr-street" placeholder="e.g. Main Road, FCI Colony" required />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Village / City *</label>
+          <input type="text" id="addr-city" placeholder="Miryalaguda / City" required />
+        </div>
+        <div class="form-group">
+          <label>State *</label>
+          <input type="text" id="addr-state" value="Telangana" required />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Pincode *</label>
+          <input type="text" id="addr-pin" placeholder="508207" required />
+        </div>
+        <div class="form-group">
+          <label>Landmark</label>
+          <input type="text" id="addr-landmark" placeholder="e.g. Opposite Sonalika Showroom" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Address Type *</label>
+        <div class="address-type-selector">
+          <label class="atype-btn active"><input type="radio" name="addrType" value="Home" checked /> 🏠 Home</label>
+          <label class="atype-btn"><input type="radio" name="addrType" value="Work" /> 🏢 Work</label>
+          <label class="atype-btn"><input type="radio" name="addrType" value="Other" /> 📍 Other</label>
+        </div>
+      </div>
+
+      <div class="form-row" style="align-items:center;margin-top:1rem;gap:1.5rem">
+        <label class="checkbox-label">
+          <input type="checkbox" id="addr-save" checked /> Save address to permanent account address book
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="addr-default" /> Set as default address
+        </label>
+      </div>
+
+      <div class="apm-actions" style="margin-top:1.5rem">
+        <button type="button" class="btn btn-secondary" onclick="closeAddressModal(null, true)">Cancel</button>
+        <button type="submit" class="btn btn-primary">📍 Confirm Delivery Location &amp; Save</button>
+      </div>
+    </form>
   </div>
 </div>
 

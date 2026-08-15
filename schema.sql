@@ -38,12 +38,18 @@ ON CONFLICT (id) DO UPDATE SET
 -- 2. ORDERS TABLE
 CREATE TABLE IF NOT EXISTS public.orders (
   id TEXT PRIMARY KEY,
+  user_phone TEXT,
+  selected_address_id TEXT,
   customer_name TEXT NOT NULL,
   customer_phone TEXT NOT NULL,
   customer_address TEXT NOT NULL,
   landmark TEXT,
   city TEXT,
   pincode TEXT,
+  latitude NUMERIC,
+  longitude NUMERIC,
+  google_maps_url TEXT,
+  address_snapshot JSONB,
   delivery_date DATE NOT NULL,
   delivery_time TEXT,
   notes TEXT,
@@ -59,7 +65,28 @@ CREATE TABLE IF NOT EXISTS public.orders (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 3. SERVICE BOOKINGS TABLE (Tractor & Water Tanker)
+-- 3. SAVED ADDRESSES TABLE (Amazon/Flipkart Style Address Book)
+CREATE TABLE IF NOT EXISTS public.addresses (
+  id TEXT PRIMARY KEY,
+  user_phone TEXT NOT NULL,
+  name TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  house_no TEXT,
+  street_area TEXT,
+  city TEXT,
+  state TEXT,
+  pincode TEXT,
+  landmark TEXT,
+  address_type TEXT DEFAULT 'Home',
+  latitude NUMERIC,
+  longitude NUMERIC,
+  formatted_address TEXT,
+  is_default BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 4. SERVICE BOOKINGS TABLE (Tractor & Water Tanker)
 CREATE TABLE IF NOT EXISTS public.service_bookings (
   id TEXT PRIMARY KEY,
   service_type TEXT NOT NULL,
@@ -78,7 +105,21 @@ CREATE TABLE IF NOT EXISTS public.service_bookings (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 4. USERS TABLE
+-- 5. LIVE DELIVERY TRACKING TABLE (Swiggy/Zomato Style Driver Position)
+CREATE TABLE IF NOT EXISTS public.delivery_tracking (
+  id TEXT PRIMARY KEY,
+  order_id TEXT NOT NULL UNIQUE,
+  driver_name TEXT DEFAULT 'Ravi Driver',
+  driver_phone TEXT DEFAULT '9121861110',
+  current_latitude NUMERIC NOT NULL,
+  current_longitude NUMERIC NOT NULL,
+  heading NUMERIC DEFAULT 0,
+  speed NUMERIC DEFAULT 0,
+  estimated_delivery_time TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 6. USERS TABLE
 CREATE TABLE IF NOT EXISTS public.users (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT NOT NULL,
@@ -91,18 +132,25 @@ CREATE TABLE IF NOT EXISTS public.users (
 -- Enable Row Level Security (RLS)
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.addresses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.service_bookings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.delivery_tracking ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies if they exist before recreating to prevent duplicate policy errors
 DROP POLICY IF EXISTS "Allow public read access to products" ON public.products;
 DROP POLICY IF EXISTS "Allow public insert to orders" ON public.orders;
 DROP POLICY IF EXISTS "Allow public read access to orders" ON public.orders;
+DROP POLICY IF EXISTS "Allow public access to addresses" ON public.addresses;
 DROP POLICY IF EXISTS "Allow public insert to service_bookings" ON public.service_bookings;
 DROP POLICY IF EXISTS "Allow public read access to service_bookings" ON public.service_bookings;
+DROP POLICY IF EXISTS "Allow public access to delivery_tracking" ON public.delivery_tracking;
 
 -- Create policies safely
 CREATE POLICY "Allow public read access to products" ON public.products FOR SELECT USING (true);
 CREATE POLICY "Allow public insert to orders" ON public.orders FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow public read access to orders" ON public.orders FOR SELECT USING (true);
+CREATE POLICY "Allow public access to addresses" ON public.addresses FOR ALL USING (true);
 CREATE POLICY "Allow public insert to service_bookings" ON public.service_bookings FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow public read access to service_bookings" ON public.service_bookings FOR SELECT USING (true);
+CREATE POLICY "Allow public access to delivery_tracking" ON public.delivery_tracking FOR ALL USING (true);
+

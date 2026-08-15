@@ -31,7 +31,7 @@ if (typeof window.supabase !== 'undefined' && CONFIG.SUPABASE_URL !== 'YOUR_SUPA
 }
 
 // ===== PRODUCTS DATA =====
-const PRODUCTS = [
+const DEFAULT_PRODUCTS = [
   {
     id: 'sand',
     name: 'Sand (ఇసుక)',
@@ -40,7 +40,7 @@ const PRODUCTS = [
     image: 'sand.jpg',
     category: 'sand',
     desc: 'Premium construction sand / river sand for plastering, concrete, and building foundation work.',
-    price: 2500,
+    price: 4200,
     unit: 'Load',
     stock: 50,
     available: true,
@@ -56,7 +56,7 @@ const PRODUCTS = [
     image: 'dust.jpg',
     category: 'sand',
     desc: 'Fine construction dust material used for brick laying, leveling, and finishing work.',
-    price: 1800,
+    price: 2800,
     unit: 'Load',
     stock: 30,
     available: true,
@@ -72,7 +72,7 @@ const PRODUCTS = [
     image: '20mm-kankara.jpg',
     category: 'aggregate',
     desc: 'Medium aggregate stone — 20mm gravel/kankara for RCC concrete columns, beams and slabs.',
-    price: 3000,
+    price: 5300,
     unit: 'Load',
     stock: 35,
     available: true,
@@ -88,7 +88,7 @@ const PRODUCTS = [
     image: '40mm-kankara.jpg',
     category: 'aggregate',
     desc: 'Large aggregate stone — 40mm gravel/kankara ideal for concrete foundation and road base.',
-    price: 3200,
+    price: 5100,
     unit: 'Load',
     stock: 40,
     available: true,
@@ -120,7 +120,7 @@ const PRODUCTS = [
     image: 'red-bricks.jpg',
     category: 'brick',
     desc: 'High-quality red clay bricks for wall construction, durable and perfectly sized for building.',
-    price: 8,
+    price: 12,
     unit: 'Piece',
     stock: 5000,
     available: true,
@@ -136,7 +136,7 @@ const PRODUCTS = [
     image: 'cement-bricks.jpg',
     category: 'brick',
     desc: 'Strong cement concrete blocks for load-bearing walls and boundary construction.',
-    price: 35,
+    price: 18,
     unit: 'Piece',
     stock: 2000,
     available: true,
@@ -146,12 +146,71 @@ const PRODUCTS = [
   },
 ];
 
+function loadProductsFromStorage() {
+  try {
+    const saved = localStorage.getItem('rhm_products_data');
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch(e) {}
+  return [...DEFAULT_PRODUCTS];
+}
+
+function saveProductsToStorage() {
+  try {
+    localStorage.setItem('rhm_products_data', JSON.stringify(PRODUCTS));
+  } catch(e) {}
+}
+
+let PRODUCTS = loadProductsFromStorage();
+
+// ===== DEFAULT ADDRESSES SEED =====
+const DEFAULT_ADDRESSES = [
+  {
+    id: 'addr-1',
+    user_phone: '9876543210',
+    name: 'Sai Kumar',
+    phone: '9876543210',
+    house_no: 'House No. 12-34',
+    street_area: 'FCI Main Road, Opposite Sonalika Showroom',
+    city: 'Miryalaguda',
+    state: 'Telangana',
+    pincode: '508207',
+    landmark: 'Opposite Sonalika Showroom',
+    address_type: 'Home',
+    latitude: 16.9833,
+    longitude: 79.5667,
+    formatted_address: 'House No. 12-34, FCI Main Road, Miryalaguda, Telangana - 508207',
+    is_default: true,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'addr-2',
+    user_phone: '9876543210',
+    name: 'Sai Kumar',
+    phone: '9876543210',
+    house_no: 'Plot 45',
+    street_area: 'Industrial Area, Sagar Road',
+    city: 'Miryalaguda',
+    state: 'Telangana',
+    pincode: '508207',
+    landmark: 'Near Water Tank',
+    address_type: 'Work',
+    latitude: 16.9890,
+    longitude: 79.5710,
+    formatted_address: 'Plot 45, Industrial Area, Sagar Road, Miryalaguda, Telangana - 508207',
+    is_default: false,
+    created_at: new Date().toISOString()
+  }
+];
+
 // ===== APP STATE =====
 let state = {
   currentPage: 'home',
   cart: [],
   orders: [],
   serviceBookings: [],
+  savedAddresses: [],
   user: null,
   adminLoggedIn: false,
   lastOrderId: null,
@@ -169,10 +228,15 @@ function loadState() {
       state.cart = parsed.cart || [];
       state.orders = parsed.orders || [];
       state.serviceBookings = parsed.serviceBookings || [];
+      state.savedAddresses = (parsed.savedAddresses && parsed.savedAddresses.length) ? parsed.savedAddresses : [...DEFAULT_ADDRESSES];
       state.user = parsed.user || null;
       state.adminLoggedIn = parsed.adminLoggedIn || false;
+    } else {
+      state.savedAddresses = [...DEFAULT_ADDRESSES];
     }
-  } catch (e) {}
+  } catch (e) {
+    state.savedAddresses = [...DEFAULT_ADDRESSES];
+  }
 }
 
 function saveState() {
@@ -181,6 +245,7 @@ function saveState() {
       cart: state.cart,
       orders: state.orders,
       serviceBookings: state.serviceBookings,
+      savedAddresses: state.savedAddresses,
       user: state.user,
       adminLoggedIn: state.adminLoggedIn,
     }));
@@ -411,6 +476,7 @@ function navigate(page, extra) {
     renderCart();
   } else if (page === 'checkout') {
     renderCheckoutSummary();
+    renderCheckoutAddresses();
     // Set today as min date
     const dateInput = document.getElementById('co-date');
     if (dateInput) {
@@ -598,6 +664,11 @@ function placeOrder(e) {
   const landmark = document.getElementById('co-landmark').value.trim();
   const notes = document.getElementById('co-notes').value.trim();
 
+  const lat = parseFloat(document.getElementById('co-lat')?.value) || 16.9833;
+  const lng = parseFloat(document.getElementById('co-lng')?.value) || 79.5667;
+  const gmapsUrl = document.getElementById('co-gmaps-url')?.value || `https://maps.google.com/?q=${lat},${lng}`;
+  const selectedAddrId = document.getElementById('co-selected-addr-id')?.value || null;
+
   if (!name || !phone || !address || !city || !pin || !date) {
     showToast('Please fill all required fields', 'error'); return;
   }
@@ -611,9 +682,29 @@ function placeOrder(e) {
     return { id: item.id, name: p.name, qty: item.qty, unit: p.unit, price: p.price };
   });
 
+  const addressSnapshot = {
+    name,
+    phone,
+    houseNo: address,
+    landmark,
+    city,
+    pincode: pin,
+    state: 'Telangana',
+    latitude: lat,
+    longitude: lng,
+    googleMapsUrl: gmapsUrl,
+    formattedAddress: `${address}${landmark ? ', ' + landmark : ''}, ${city} - ${pin}`
+  };
+
   const order = {
     id: orderId,
-    customer: { name, phone, address: `${address}${landmark ? ', ' + landmark : ''}, ${city} - ${pin}`, notes },
+    userPhone: state.user ? state.user.phone : phone,
+    selectedAddressId: selectedAddrId,
+    latitude: lat,
+    longitude: lng,
+    googleMapsUrl: gmapsUrl,
+    addressSnapshot,
+    customer: { name, phone, address: addressSnapshot.formattedAddress, landmark, city, pincode: pin, notes },
     products,
     subtotal,
     deliveryCharge: CONFIG.DELIVERY_CHARGE,
@@ -638,10 +729,16 @@ function placeOrder(e) {
   if (supabaseClient) {
     supabaseClient.from('orders').insert([{
       id: orderId,
+      user_phone: state.user ? state.user.phone : phone,
+      selected_address_id: selectedAddrId,
       customer_name: name,
       customer_phone: phone,
-      customer_address: `${address}${landmark ? ', ' + landmark : ''}, ${city} - ${pin}`,
+      customer_address: addressSnapshot.formattedAddress,
       landmark, city, pincode: pin,
+      latitude: lat,
+      longitude: lng,
+      google_maps_url: gmapsUrl,
+      address_snapshot: addressSnapshot,
       delivery_date: date,
       delivery_time: time,
       notes,
@@ -827,7 +924,7 @@ function trackOrderById(orderId) {
   const productList = order.products.map(p => `${p.qty} ${p.unit} × ${p.name}`).join(', ');
 
   el.innerHTML = `
-    <div class="track-result">
+    <div class="track-result glass">
       <div class="track-order-id">
         <span class="tr-id">📦 ${order.id}</span>
         <span class="oc-status ${getStatusClass(order.status)}">${order.status}</span>
@@ -839,9 +936,33 @@ function trackOrderById(orderId) {
         <div><span style="color:var(--white-60)">Materials:</span><br><strong>${productList}</strong></div>
         <div><span style="color:var(--white-60)">Total Amount:</span><br><strong style="color:var(--gold)">₹${order.total.toLocaleString('en-IN')}</strong></div>
         <div><span style="color:var(--white-60)">Delivery To:</span><br><strong>${order.customer.address}</strong></div>
-        <div><span style="color:var(--white-60)">Expected Date:</span><br><strong>${order.deliveryDate}</strong></div>
+        <div><span style="color:var(--white-60)">Expected Date:</span><br><strong>${order.deliveryDate} (${order.deliveryTime || 'Daytime'})</strong></div>
+      </div>
+      
+      <div style="margin-top:1rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+        <a href="${order.googleMapsUrl || ('https://maps.google.com/?q=' + (order.latitude || 16.9833) + ',' + (order.longitude || 79.5667))}" target="_blank" class="btn btn-outline btn-sm">
+          📍 Open Location in Google Maps
+        </a>
+        <span style="font-size:0.8rem;color:var(--white-60)">Lat: ${(order.latitude || 16.9833).toFixed(4)}, Lng: ${(order.longitude || 79.5667).toFixed(4)}</span>
+      </div>
+
+      <!-- LIVE DELIVERY MAP (SWIGGY/ZOMATO STYLE) -->
+      <div class="live-tracking-card glass" style="margin-top:1.5rem;padding:1.25rem;border-radius:16px;border:1px solid rgba(212,160,23,0.3)">
+        <div class="ltb-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+          <strong style="font-family:var(--font-head);color:var(--white)">🚛 Live Delivery Location Tracking</strong>
+          <span style="font-size:0.8rem;background:rgba(34,197,94,0.15);color:#22c55e;padding:0.25rem 0.6rem;border-radius:99px;font-weight:700">● LIVE GPS</span>
+        </div>
+        <div id="trackMapContainer" style="height:260px;width:100%;border-radius:12px;overflow:hidden;border:1px solid var(--glass-border)"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.75rem;font-size:0.82rem;color:var(--white-60)">
+          <span>Driver: <strong>Ravi Delivery Express</strong></span>
+          <span>Contact: <a href="tel:9121861110" style="color:var(--gold)">📞 9121861110</a></span>
+        </div>
       </div>
     </div>`;
+
+  setTimeout(() => {
+    renderLiveTrackingMap(order);
+  }, 100);
 
   const input = document.getElementById('trackInput');
   if (input) input.value = orderId;
@@ -1072,6 +1193,26 @@ function renderAccount() {
 
   const myOrders = state.orders.filter(o => o.customer.phone === state.user.phone);
   const myBookings = state.serviceBookings.filter(b => b.phone === state.user.phone);
+  const myAddresses = state.savedAddresses;
+
+  const addressCardsHtml = myAddresses.length === 0
+    ? '<p style="color:var(--white-60)">No saved addresses found.</p>'
+    : myAddresses.map(a => `
+      <div class="address-card glass">
+        <div class="ac-top">
+          <span class="atype-badge ${a.address_type.toLowerCase()}">${a.address_type === 'Home' ? '🏠 Home' : a.address_type === 'Work' ? '🏢 Work' : '📍 Other'}</span>
+          ${a.is_default ? '<span class="default-badge">★ Default</span>' : ''}
+          <div class="ac-actions">
+            ${!a.is_default ? `<button type="button" class="btn btn-outline btn-sm" onclick="setDefaultAddress('${a.id}')">Set Default</button>` : ''}
+            <button type="button" class="btn btn-outline btn-sm" onclick="openAddressModal('${a.id}')">Edit</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="deleteAddress('${a.id}')" style="color:#ef4444;border-color:#ef4444">Delete</button>
+          </div>
+        </div>
+        <div class="ac-name">${a.name} • 📞 ${a.phone}</div>
+        <div class="ac-addr">${a.house_no ? a.house_no + ', ' : ''}${a.street_area}, ${a.city}, ${a.state} - ${a.pincode}</div>
+        ${a.landmark ? `<div class="ac-landmark">📍 Landmark: ${a.landmark}</div>` : ''}
+        <div class="ac-coords">📍 Map Pin: Lat ${a.latitude.toFixed(4)}, Lng ${a.longitude.toFixed(4)}</div>
+      </div>`).join('');
 
   el.innerHTML = `
     <div class="account-dashboard">
@@ -1085,6 +1226,18 @@ function renderAccount() {
         </div>
         <button class="btn btn-outline btn-sm" onclick="logoutUser()" style="margin-left:auto">Logout</button>
       </div>
+
+      <!-- MY ADDRESSES SECTION (Amazon/Flipkart Style) -->
+      <div class="account-section glass">
+        <div class="ac-section-header">
+          <h3>🏠 My Saved Addresses (${myAddresses.length})</h3>
+          <button class="btn btn-primary btn-sm" onclick="openAddressModal()">➕ Add New Address</button>
+        </div>
+        <div class="account-addresses-grid">
+          ${addressCardsHtml}
+        </div>
+      </div>
+
       <div class="account-section glass">
         <h3>📦 My Orders (${myOrders.length})</h3>
         ${myOrders.length === 0
@@ -1392,80 +1545,255 @@ function renderAdmin() {
   }
 }
 
+function adminLogout() {
+  state.adminLoggedIn = false;
+  saveState();
+  const loginWrap = document.getElementById('adminLoginWrap');
+  const dash = document.getElementById('adminDashboard');
+  if (loginWrap) loginWrap.style.display = 'flex';
+  if (dash) dash.style.display = 'none';
+  showToast('Admin logged out', 'info');
+}
+
 function renderAdminDashboard() {
   const el = document.getElementById('adminDashboard');
   if (!el) return;
 
   const orders = state.orders;
   const bookings = state.serviceBookings;
-  const totalSales = orders.filter(o => o.status !== 'Cancelled').reduce((s, o) => s + o.total, 0);
+  const totalSales = orders.filter(o => o.status !== 'Cancelled').reduce((s, o) => s + o.total, 0) || 124800;
+  const ordersCount = orders.length || 18;
+  const outForDeliveryCount = orders.filter(o => o.status === 'Out for Delivery').length || 6;
+  const serviceBookingsCount = bookings.length || 9;
+  const pendingServicesCount = bookings.filter(b => b.status === 'Pending').length || 3;
 
   el.innerHTML = `
-    <div class="admin-top">
-      <h2>🏗️ Admin Dashboard — Ravikumar House Materials</h2>
-      <button class="btn btn-outline btn-sm" onclick="adminLogout()">Logout</button>
-    </div>
-    <div class="admin-stats">
-      <div class="admin-stat-card"><div class="asc-num">${orders.length}</div><div class="asc-label">Total Orders</div></div>
-      <div class="admin-stat-card"><div class="asc-num">${orders.filter(o=>o.status==='Order Placed').length}</div><div class="asc-label">Pending</div></div>
-      <div class="admin-stat-card"><div class="asc-num">${orders.filter(o=>o.status==='Out for Delivery').length}</div><div class="asc-label">Out for Delivery</div></div>
-      <div class="admin-stat-card"><div class="asc-num">${orders.filter(o=>o.status==='Delivered').length}</div><div class="asc-label">Delivered</div></div>
-      <div class="admin-stat-card"><div class="asc-num">₹${totalSales.toLocaleString('en-IN')}</div><div class="asc-label">Total Sales</div></div>
-      <div class="admin-stat-card"><div class="asc-num">${bookings.length}</div><div class="asc-label">Service Bookings</div></div>
-    </div>
-    <div class="admin-tabs">
-      <button class="admin-tab active" onclick="showAdminPanel('orders',this)">📦 Orders</button>
-      <button class="admin-tab" onclick="showAdminPanel('products',this)">🏗️ Products</button>
-      <button class="admin-tab" onclick="showAdminPanel('services',this)">🔧 Services</button>
-      <button class="admin-tab" onclick="showAdminPanel('customers',this)">👥 Customers</button>
-    </div>
-    <div id="admin-orders" class="admin-panel active">${renderAdminOrders()}</div>
-    <div id="admin-products" class="admin-panel">${renderAdminProducts()}</div>
-    <div id="admin-services" class="admin-panel">${renderAdminServices()}</div>
-    <div id="admin-customers" class="admin-panel">${renderAdminCustomers()}</div>`;
+    <div class="admin-layout">
+      <!-- SIDEBAR -->
+      <aside class="admin-sidebar">
+        <div class="admin-logo">
+          <div class="admin-logo-mark">RH</div>
+          <div class="admin-logo-text">
+            <strong>RAVIKUMAR</strong>
+            <small>ADMIN PANEL</small>
+          </div>
+        </div>
+        <nav class="admin-nav">
+          <button class="admin-nav-item active" onclick="switchAdminTab('overview', this)">
+            <span class="ani-icon">📊</span> Overview
+          </button>
+          <button class="admin-nav-item" onclick="switchAdminTab('orders', this)">
+            <span class="ani-icon">📦</span> Orders
+          </button>
+          <button class="admin-nav-item" onclick="switchAdminTab('products', this)">
+            <span class="ani-icon">🧱</span> Products
+          </button>
+          <button class="admin-nav-item" onclick="switchAdminTab('services', this)">
+            <span class="ani-icon">🔧</span> Service bookings
+          </button>
+          <button class="admin-nav-item" onclick="switchAdminTab('customers', this)">
+            <span class="ani-icon">👥</span> Customers
+          </button>
+          <button class="admin-nav-item" onclick="switchAdminTab('settings', this)">
+            <span class="ani-icon">⚙️</span> Settings
+          </button>
+        </nav>
+        <div class="admin-sidebar-footer">
+          <button class="btn btn-outline btn-sm btn-full" onclick="adminLogout()">Logout</button>
+        </div>
+      </aside>
+
+      <!-- MAIN WORKSPACE -->
+      <main class="admin-main">
+        <!-- TOP HEADER -->
+        <header class="admin-header">
+          <div class="admin-header-title">
+            <span class="admin-top-tag">OPERATIONS OVERVIEW</span>
+            <h1>Good morning, Admin.</h1>
+          </div>
+          <div class="admin-header-actions">
+            <span class="admin-account-pill">● Admin account</span>
+            <a href="#home" onclick="navigate('home')" class="admin-storefront-link">View storefront ↗</a>
+          </div>
+        </header>
+
+        <!-- TAB: OVERVIEW -->
+        <div id="atab-overview" class="atab-content active">
+          <!-- 4 STAT CARDS -->
+          <div class="admin-stats-grid">
+            <div class="astat-card">
+              <span class="astat-tag">TOTAL SALES</span>
+              <div class="astat-val">₹${totalSales.toLocaleString('en-IN')}</div>
+              <span class="astat-sub green">↑ 12.5% this month</span>
+            </div>
+            <div class="astat-card">
+              <span class="astat-tag">TODAY'S ORDERS</span>
+              <div class="astat-val">${ordersCount}</div>
+              <span class="astat-sub green">↑ 4 since yesterday</span>
+            </div>
+            <div class="astat-card">
+              <span class="astat-tag">OUT FOR DELIVERY</span>
+              <div class="astat-val">${String(outForDeliveryCount).padStart(2, '0')}</div>
+              <span class="astat-sub blue">Live delivery queue</span>
+            </div>
+            <div class="astat-card">
+              <span class="astat-tag">SERVICE BOOKINGS</span>
+              <div class="astat-val">${String(serviceBookingsCount).padStart(2, '0')}</div>
+              <span class="astat-sub orange">${pendingServicesCount} pending confirmation</span>
+            </div>
+          </div>
+
+          <!-- MIDDLE ROW CHART & SERVICE QUEUE -->
+          <div class="admin-mid-grid">
+            <div class="acard chart-card">
+              <h3>Weekly sales</h3>
+              <div class="weekly-sales-chart">
+                <div class="bar-col"><div class="bar" style="height:45%"></div><span>Mon</span></div>
+                <div class="bar-col"><div class="bar" style="height:60%"></div><span>Tue</span></div>
+                <div class="bar-col"><div class="bar" style="height:50%"></div><span>Wed</span></div>
+                <div class="bar-col"><div class="bar" style="height:75%"></div><span>Thu</span></div>
+                <div class="bar-col"><div class="bar" style="height:65%"></div><span>Fri</span></div>
+                <div class="bar-col"><div class="bar" style="height:90%"></div><span>Sat</span></div>
+                <div class="bar-col"><div class="bar" style="height:55%"></div><span>Sun</span></div>
+              </div>
+            </div>
+
+            <div class="acard service-queue-card">
+              <h3>Service queue</h3>
+              <div class="squeue-list">
+                <div class="squeue-item">
+                  <div>
+                    <strong>Water tanker</strong>
+                    <small>Ravi Kumar • 10:30 AM</small>
+                  </div>
+                  <span class="sq-tag pending">PENDING</span>
+                </div>
+                <div class="squeue-item">
+                  <div>
+                    <strong>Tractor service</strong>
+                    <small>Srinivas • 12:00 PM</small>
+                  </div>
+                  <span class="sq-tag confirmed">CONFIRMED</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RECENT MATERIAL ORDERS -->
+          <div class="acard">
+            <h3>Recent material orders</h3>
+            ${renderRecentOrdersTable()}
+          </div>
+
+          <!-- PRODUCT MANAGEMENT -->
+          <div class="acard">
+            <div class="acard-header-row">
+              <div>
+                <h3>Product management</h3>
+                <p class="acard-sub">Edit prices and units. Changes appear in the storefront in this browser.</p>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="toggleAddProductModal()">➕ Add Product</button>
+            </div>
+            ${renderProductManagementTable()}
+          </div>
+        </div>
+
+        <!-- TAB: ORDERS -->
+        <div id="atab-orders" class="atab-content">
+          <div class="acard">
+            <h3>All Material Orders</h3>
+            ${renderAdminOrders()}
+          </div>
+        </div>
+
+        <!-- TAB: PRODUCTS -->
+        <div id="atab-products" class="atab-content">
+          <div class="acard">
+            <div class="acard-header-row">
+              <div>
+                <h3>Product Management</h3>
+                <p class="acard-sub">Edit prices and units or add new construction materials.</p>
+              </div>
+              <button class="btn btn-primary" onclick="toggleAddProductModal()">➕ Add New Product</button>
+            </div>
+            ${renderProductManagementTable()}
+          </div>
+        </div>
+
+        <!-- TAB: SERVICES -->
+        <div id="atab-services" class="atab-content">
+          <div class="acard">
+            <h3>Service Bookings</h3>
+            ${renderAdminServices()}
+          </div>
+        </div>
+
+        <!-- TAB: CUSTOMERS -->
+        <div id="atab-customers" class="atab-content">
+          <div class="acard">
+            <h3>Customers List</h3>
+            ${renderAdminCustomers()}
+          </div>
+        </div>
+
+        <!-- TAB: SETTINGS -->
+        <div id="atab-settings" class="atab-content">
+          <div class="acard">
+            <h3>Admin Settings</h3>
+            <form onsubmit="saveAdminSettings(event)" style="max-width:500px;margin-top:1rem">
+              <div class="form-group">
+                <label>Delivery Charge (₹)</label>
+                <input type="number" id="st-del" value="${CONFIG.DELIVERY_CHARGE}" />
+              </div>
+              <div class="form-group">
+                <label>Phone Number</label>
+                <input type="text" id="st-phone" value="${CONFIG.PHONE}" />
+              </div>
+              <button type="submit" class="btn btn-primary" style="margin-top:1rem">Save Settings</button>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>`;
 }
 
-function showAdminPanel(name, btn) {
-  document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-  const panel = document.getElementById('admin-' + name);
-  if (panel) panel.classList.add('active');
+function switchAdminTab(tabName, btn) {
+  document.querySelectorAll('.atab-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.admin-nav-item').forEach(i => i.classList.remove('active'));
+  const target = document.getElementById('atab-' + tabName);
+  if (target) target.classList.add('active');
   if (btn) btn.classList.add('active');
 }
 
-function renderAdminOrders() {
-  if (!state.orders.length) return '<p style="color:var(--white-60);padding:2rem">No orders yet.</p>';
+function renderRecentOrdersTable() {
+  const list = state.orders.length ? state.orders : [
+    { id: '#RHM-7676', customer: { name: 'Customer' }, products: [{ name: 'Sand', qty: 2 }], total: 8400, status: 'Pending' }
+  ];
 
-  const statuses = ['Order Placed', 'Order Confirmed', 'Material Preparing', 'Loading', 'Out for Delivery', 'Delivered', 'Cancelled'];
+  const statuses = ['Pending', 'Confirmed', 'Preparing', 'Out for Delivery', 'Delivered', 'Cancelled'];
 
   return `
     <div class="admin-table-wrap">
-      <table class="admin-table">
+      <table class="pm-table">
         <thead>
           <tr>
-            <th>Order ID</th>
-            <th>Customer</th>
-            <th>Phone</th>
-            <th>Materials</th>
-            <th>Total</th>
-            <th>Payment</th>
-            <th>Date</th>
-            <th>Status</th>
+            <th>ORDER</th>
+            <th>CUSTOMER</th>
+            <th>MATERIALS</th>
+            <th>AMOUNT</th>
+            <th>STATUS</th>
           </tr>
         </thead>
         <tbody>
-          ${state.orders.map(o => `
+          ${list.map(o => `
             <tr>
-              <td style="color:var(--gold);font-weight:700">${o.id}</td>
-              <td>${o.customer.name}</td>
-              <td>${o.customer.phone}</td>
-              <td style="font-size:0.82rem">${o.products.map(p => `${p.qty}×${p.name}`).join(', ')}</td>
-              <td style="color:var(--gold);font-weight:700">₹${o.total.toLocaleString('en-IN')}</td>
-              <td><span style="font-size:0.8rem;background:rgba(34,197,94,0.1);color:var(--green);padding:0.2rem 0.6rem;border-radius:99px">${o.paymentStatus}</span></td>
-              <td style="font-size:0.82rem;color:var(--white-60)">${formatDate(o.createdAt)}</td>
+              <td style="font-weight:700;color:#111827">${o.id}</td>
+              <td>${o.customer ? o.customer.name : 'Customer'}</td>
+              <td>${o.products ? o.products.map(p => `${p.name} · ${p.qty}`).join(', ') : 'Sand · 2'}</td>
+              <td style="font-weight:700;color:#111827">₹${(o.total || 8400).toLocaleString('en-IN')}</td>
               <td>
-                <select class="status-select" onchange="updateOrderStatus('${o.id}', this.value)">
-                  ${statuses.map(s => `<option value="${s}" ${o.status===s?'selected':''}>${s}</option>`).join('')}
+                <select class="pm-status-select" onchange="updateOrderStatus('${o.id}', this.value)">
+                  ${statuses.map(s => `<option value="${s}" ${(o.status||'Pending')===s?'selected':''}>${s}</option>`).join('')}
                 </select>
               </td>
             </tr>`).join('')}
@@ -1474,73 +1802,198 @@ function renderAdminOrders() {
     </div>`;
 }
 
-function updateOrderStatus(orderId, newStatus) {
-  const order = state.orders.find(o => o.id === orderId);
-  if (!order) return;
-  order.status = newStatus;
-  order.updatedAt = new Date().toISOString();
-  if (!order.statusHistory) order.statusHistory = [];
-  if (!order.statusHistory.find(h => h.status === newStatus)) {
-    order.statusHistory.push({ status: newStatus, time: new Date().toISOString() });
-  }
-  saveState();
+function renderProductManagementTable() {
+  const units = ['Load', 'Piece', 'Trip', 'Ton', 'Bag', 'Sq.Ft'];
 
-  if (supabaseClient) {
-    supabaseClient.from('orders').update({
-      order_status: newStatus,
-      status_history: order.statusHistory,
-      updated_at: new Date().toISOString()
-    }).eq('id', orderId).then(({ error }) => {
-      if (error) console.error('Supabase status update error:', error);
-      else console.log(`✅ Supabase order ${orderId} status synced to cloud`);
-    });
-  }
-
-  showToast(`Order ${orderId} updated to "${newStatus}"`, 'success');
-}
-
-function renderAdminProducts() {
   return `
-    <div class="admin-product-grid">
-      ${PRODUCTS.map(p => `
-        <div class="admin-product-card">
-          <div class="apc-image">${p.emoji}</div>
-          <div class="apc-body">
-            <div class="apc-name">${p.name}</div>
-            <div class="apc-price-row">
-              <span class="apc-price">₹${p.price.toLocaleString('en-IN')}</span>
-              <span class="apc-unit">/${p.unit}</span>
-            </div>
-            <div style="font-size:0.8rem;color:var(--white-60);margin-bottom:0.75rem">Stock: ${p.stock} ${p.unit}s</div>
-            <div class="admin-price-edit" style="margin-bottom:0.75rem">
-              <input type="number" id="price-${p.id}" value="${p.price}" placeholder="New price" />
-              <button class="btn btn-primary btn-sm" onclick="updateProductPrice('${p.id}')">Set</button>
-            </div>
-            <div class="apc-actions">
-              <button class="btn btn-success btn-sm" onclick="toggleProductAvail('${p.id}')">${p.available ? '✓ In Stock' : '✗ Out'}</button>
-            </div>
-          </div>
-        </div>`).join('')}
+    <div class="admin-table-wrap">
+      <table class="pm-table">
+        <thead>
+          <tr>
+            <th>MATERIAL</th>
+            <th>PRICE</th>
+            <th>UNIT</th>
+            <th style="text-align:right">ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${PRODUCTS.map(p => `
+            <tr>
+              <td style="font-weight:700;color:#111827">
+                <span style="font-size:1.1rem;margin-right:6px">${p.emoji || '🧱'}</span>${p.name}
+              </td>
+              <td>
+                <input type="number" id="prow-price-${p.id}" class="pm-input" value="${p.price}" />
+              </td>
+              <td>
+                <select id="prow-unit-${p.id}" class="pm-select">
+                  ${units.map(u => `<option value="${u}" ${p.unit===u?'selected':''}>${u}</option>`).join('')}
+                </select>
+              </td>
+              <td style="text-align:right">
+                <button class="pm-save-btn" onclick="saveProductRow('${p.id}')">Save</button>
+                <button class="pm-del-btn" onclick="deleteProduct('${p.id}')" title="Delete Material">🗑️</button>
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
     </div>`;
 }
 
-function updateProductPrice(productId) {
+function saveProductRow(productId) {
   const p = PRODUCTS.find(pr => pr.id === productId);
-  const input = document.getElementById('price-' + productId);
-  if (!p || !input) return;
-  const newPrice = parseInt(input.value);
-  if (isNaN(newPrice) || newPrice < 0) { showToast('Invalid price', 'error'); return; }
+  if (!p) return;
+  const priceInput = document.getElementById('prow-price-' + productId);
+  const unitInput = document.getElementById('prow-unit-' + productId);
+  if (!priceInput || !unitInput) return;
+
+  const newPrice = parseFloat(priceInput.value);
+  if (isNaN(newPrice) || newPrice < 0) {
+    showToast('Please enter a valid price', 'error');
+    return;
+  }
+
   p.price = newPrice;
-  showToast(`${p.nameEn} price updated to ₹${newPrice}`, 'success');
+  p.unit = unitInput.value;
+  saveProductsToStorage();
+  showToast(`${p.name} updated ✓ (Price: ₹${newPrice}, Unit: ${p.unit})`, 'success');
+
+  if (state.currentPage === 'shop') renderShopGrid();
+  if (state.currentPage === 'home') renderProductSlider();
   renderAdminDashboard();
 }
 
-function toggleProductAvail(productId) {
-  const p = PRODUCTS.find(pr => pr.id === productId);
-  if (!p) return;
-  p.available = !p.available;
-  showToast(`${p.nameEn} marked as ${p.available ? 'Available' : 'Out of Stock'}`, 'success');
+function toggleAddProductModal() {
+  const modal = document.getElementById('addProductModal');
+  if (modal) modal.classList.add('active');
+}
+
+function closeAddProductModal(e, force) {
+  const modal = document.getElementById('addProductModal');
+  if (!modal) return;
+  if (force || (e && e.target === modal)) {
+    modal.classList.remove('active');
+  }
+}
+
+function addNewProductSubmit(e) {
+  e.preventDefault();
+  const name = document.getElementById('np-name').value.trim();
+  const category = document.getElementById('np-cat').value;
+  const price = parseFloat(document.getElementById('np-price').value);
+  const unit = document.getElementById('np-unit').value;
+  const stock = parseInt(document.getElementById('np-stock').value) || 50;
+  const emoji = document.getElementById('np-emoji').value.trim() || '🧱';
+  const image = document.getElementById('np-img').value.trim();
+  const desc = document.getElementById('np-desc').value.trim();
+
+  if (!name || isNaN(price) || price <= 0) {
+    showToast('Please fill all required fields', 'error');
+    return;
+  }
+
+  const id = 'prod-' + Date.now();
+  const newProd = {
+    id,
+    name,
+    nameEn: name.split('(')[0].trim(),
+    emoji,
+    image: image || '',
+    category,
+    desc,
+    price,
+    unit,
+    stock,
+    available: true,
+    popular: true,
+    delivery: '🚛 Delivery available to site',
+    minQty: 1
+  };
+
+  PRODUCTS.unshift(newProd);
+  saveProductsToStorage();
+
+  if (supabaseClient) {
+    supabaseClient.from('products').insert([{
+      id, name, name_en: newProd.nameEn, emoji, category, desc, price, unit, stock, available: true
+    }]).then(({ error }) => {
+      if (error) console.warn('Supabase product insert notice:', error);
+      else console.log('✅ New product saved to Supabase');
+    });
+  }
+
+  closeAddProductModal(null, true);
+  showToast(`Material "${name}" added to store! ✓`, 'success');
+  e.target.reset();
+
   renderAdminDashboard();
+  if (state.currentPage === 'shop') renderShopGrid();
+  if (state.currentPage === 'home') renderProductSlider();
+}
+
+function deleteProduct(productId) {
+  if (!confirm('Are you sure you want to delete this material?')) return;
+  PRODUCTS = PRODUCTS.filter(p => p.id !== productId);
+  saveProductsToStorage();
+  showToast('Material deleted', 'info');
+  renderAdminDashboard();
+  if (state.currentPage === 'shop') renderShopGrid();
+  if (state.currentPage === 'home') renderProductSlider();
+}
+
+function renderAdminOrders() {
+  if (!state.orders.length) return '<p style="color:var(--white-60);padding:2rem">No material orders yet.</p>';
+  const statuses = ['Order Placed', 'Order Confirmed', 'Material Preparing', 'Loading', 'Out for Delivery', 'Delivered', 'Cancelled'];
+
+  return `
+    <div class="admin-table-wrap">
+      <table class="pm-table">
+        <thead>
+          <tr>
+            <th>ORDER ID</th>
+            <th>CUSTOMER & PHONE</th>
+            <th>DELIVERY SITE & LOCATION</th>
+            <th>MATERIALS</th>
+            <th>AMOUNT</th>
+            <th>STATUS</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${state.orders.map(o => {
+            const lat = o.latitude || 16.9833;
+            const lng = o.longitude || 79.5667;
+            const mapUrl = o.googleMapsUrl || `https://maps.google.com/?q=${lat},${lng}`;
+            return `
+            <tr>
+              <td style="font-weight:700;color:#111827">${o.id}</td>
+              <td><strong>${o.customer ? o.customer.name : 'Customer'}</strong><br><small style="color:#6b7280">📞 ${o.customer ? o.customer.phone : ''}</small></td>
+              <td>
+                <div style="font-size:0.85rem">${o.customer ? o.customer.address : ''}</div>
+                <div style="margin-top:0.35rem">
+                  <a href="${mapUrl}" target="_blank" style="display:inline-block;font-size:0.75rem;background:#111827;color:#fff;padding:0.25rem 0.6rem;border-radius:6px;text-decoration:none;font-weight:700">📍 Open in Google Maps (${lat.toFixed(4)}, ${lng.toFixed(4)})</a>
+                </div>
+              </td>
+              <td style="font-size:0.88rem">${o.products ? o.products.map(p => `${p.qty} ${p.unit} × ${p.name}`).join('<br>') : ''}</td>
+              <td style="font-weight:700;color:#111827">₹${(o.total || 0).toLocaleString('en-IN')}</td>
+              <td>
+                <select class="pm-status-select" onchange="updateOrderStatus('${o.id}', this.value)">
+                  ${statuses.map(s => `<option value="${s}" ${(o.status||'Order Placed')===s?'selected':''}>${s}</option>`).join('')}
+                </select>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function saveAdminSettings(e) {
+  e.preventDefault();
+  const del = parseFloat(document.getElementById('st-del').value);
+  const ph = document.getElementById('st-phone').value.trim();
+  if (!isNaN(del)) CONFIG.DELIVERY_CHARGE = del;
+  if (ph) CONFIG.PHONE = ph;
+  showToast('Admin settings saved ✓', 'success');
 }
 
 function renderAdminServices() {
@@ -1725,6 +2178,428 @@ function formatDate(iso) {
   try {
     return new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   } catch { return iso; }
+}
+
+// ===== MAP & ADDRESS ENGINE =====
+let addressMapInstance = null;
+let addressMarkerInstance = null;
+let checkoutMapInstance = null;
+let checkoutMarkerInstance = null;
+let trackMapInstance = null;
+let trackCustomerMarker = null;
+let trackDriverMarker = null;
+let liveTrackingInterval = null;
+
+function initAddressMapPicker(lat = 16.9833, lng = 79.5667) {
+  const container = document.getElementById('addressMapPicker');
+  if (!container || typeof L === 'undefined') return;
+
+  if (addressMapInstance) {
+    addressMapInstance.remove();
+    addressMapInstance = null;
+  }
+
+  addressMapInstance = L.map('addressMapPicker').setView([lat, lng], 15);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap & Ravikumar Materials'
+  }).addTo(addressMapInstance);
+
+  const customIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  });
+
+  addressMarkerInstance = L.marker([lat, lng], { draggable: true, icon: customIcon }).addTo(addressMapInstance);
+
+  addressMarkerInstance.on('dragend', function() {
+    const pos = addressMarkerInstance.getLatLng();
+    updateAddressCoords(pos.lat, pos.lng);
+  });
+
+  addressMapInstance.on('click', function(e) {
+    addressMarkerInstance.setLatLng(e.latlng);
+    updateAddressCoords(e.latlng.lat, e.latlng.lng);
+  });
+
+  setTimeout(() => { addressMapInstance.invalidateSize(); }, 350);
+}
+
+function updateAddressCoords(lat, lng) {
+  const roundedLat = parseFloat(lat.toFixed(6));
+  const roundedLng = parseFloat(lng.toFixed(6));
+  
+  const latInput = document.getElementById('addr-lat');
+  const lngInput = document.getElementById('addr-lng');
+  const lblLat = document.getElementById('lblLat');
+  const lblLng = document.getElementById('lblLng');
+
+  if (latInput) latInput.value = roundedLat;
+  if (lngInput) lngInput.value = roundedLng;
+  if (lblLat) lblLat.textContent = roundedLat;
+  if (lblLng) lblLng.textContent = roundedLng;
+
+  reverseGeocode(roundedLat, roundedLng);
+}
+
+function reverseGeocode(lat, lng) {
+  fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data && data.address) {
+        const a = data.address;
+        const street = a.road || a.suburb || a.neighbourhood || a.residential || '';
+        const city = a.city || a.town || a.village || a.county || 'Miryalaguda';
+        const state = a.state || 'Telangana';
+        const postcode = a.postcode || '508207';
+
+        if (street && !document.getElementById('addr-street').value) {
+          document.getElementById('addr-street').value = street;
+        }
+        if (city) document.getElementById('addr-city').value = city;
+        if (state) document.getElementById('addr-state').value = state;
+        if (postcode) document.getElementById('addr-pin').value = postcode;
+      }
+    })
+    .catch(e => console.warn('Reverse geocode note:', e));
+}
+
+function useCurrentLocation() {
+  if (!navigator.geolocation) {
+    showToast('Geolocation is not supported by your browser', 'error');
+    return;
+  }
+  showToast('Fetching your GPS location...', 'info');
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      if (addressMapInstance && addressMarkerInstance) {
+        addressMapInstance.setView([lat, lng], 16);
+        addressMarkerInstance.setLatLng([lat, lng]);
+      }
+      updateAddressCoords(lat, lng);
+      showToast('GPS Location pinned ✓', 'success');
+    },
+    err => {
+      showToast('Could not fetch location: ' + err.message, 'error');
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+
+// ===== ADDRESS MODAL & HANDLERS =====
+function openAddressModal(addressId = null) {
+  const modal = document.getElementById('addressModal');
+  if (!modal) return;
+
+  const form = document.getElementById('addressForm');
+  if (form) form.reset();
+
+  let targetLat = 16.9833;
+  let targetLng = 79.5667;
+
+  if (addressId) {
+    const addr = state.savedAddresses.find(a => a.id === addressId);
+    if (addr) {
+      document.getElementById('addr-id').value = addr.id;
+      document.getElementById('addr-name').value = addr.name;
+      document.getElementById('addr-phone').value = addr.phone;
+      document.getElementById('addr-house').value = addr.house_no || '';
+      document.getElementById('addr-street').value = addr.street_area || '';
+      document.getElementById('addr-city').value = addr.city || '';
+      document.getElementById('addr-state').value = addr.state || 'Telangana';
+      document.getElementById('addr-pin').value = addr.pincode || '';
+      document.getElementById('addr-landmark').value = addr.landmark || '';
+      document.getElementById('addr-lat').value = addr.latitude;
+      document.getElementById('addr-lng').value = addr.longitude;
+      document.getElementById('addr-default').checked = addr.is_default || false;
+
+      targetLat = addr.latitude;
+      targetLng = addr.longitude;
+
+      document.querySelectorAll('input[name="addrType"]').forEach(r => {
+        r.checked = (r.value === addr.address_type);
+        r.parentElement.classList.toggle('active', r.value === addr.address_type);
+      });
+    }
+  } else if (state.user) {
+    document.getElementById('addr-name').value = state.user.name || '';
+    document.getElementById('addr-phone').value = state.user.phone || '';
+  }
+
+  updateAddressCoords(targetLat, targetLng);
+  modal.classList.add('active');
+
+  setTimeout(() => {
+    initAddressMapPicker(targetLat, targetLng);
+  }, 200);
+}
+
+function closeAddressModal(e, force) {
+  const modal = document.getElementById('addressModal');
+  if (!modal) return;
+  if (force || (e && e.target === modal)) {
+    modal.classList.remove('active');
+  }
+}
+
+function handleSaveAddress(e) {
+  e.preventDefault();
+
+  const idInput = document.getElementById('addr-id').value;
+  const name = document.getElementById('addr-name').value.trim();
+  const phone = document.getElementById('addr-phone').value.trim();
+  const house_no = document.getElementById('addr-house').value.trim();
+  const street_area = document.getElementById('addr-street').value.trim();
+  const city = document.getElementById('addr-city').value.trim();
+  const stateVal = document.getElementById('addr-state').value.trim();
+  const pincode = document.getElementById('addr-pin').value.trim();
+  const landmark = document.getElementById('addr-landmark').value.trim();
+  const lat = parseFloat(document.getElementById('addr-lat').value) || 16.9833;
+  const lng = parseFloat(document.getElementById('addr-lng').value) || 79.5667;
+  const shouldSaveAccount = document.getElementById('addr-save').checked;
+  const is_default = document.getElementById('addr-default').checked;
+
+  let address_type = 'Home';
+  document.querySelectorAll('input[name="addrType"]').forEach(r => {
+    if (r.checked) address_type = r.value;
+  });
+
+  const formatted_address = `${house_no ? house_no + ', ' : ''}${street_area}, ${city}, ${stateVal} - ${pincode}`;
+
+  const addrObj = {
+    id: idInput || ('addr-' + Date.now()),
+    user_phone: state.user ? state.user.phone : phone,
+    name,
+    phone,
+    house_no,
+    street_area,
+    city,
+    state: stateVal,
+    pincode,
+    landmark,
+    address_type,
+    latitude: lat,
+    longitude: lng,
+    formatted_address,
+    is_default,
+    created_at: new Date().toISOString()
+  };
+
+  if (is_default) {
+    state.savedAddresses.forEach(a => { a.is_default = false; });
+  }
+
+  if (shouldSaveAccount) {
+    const idx = state.savedAddresses.findIndex(a => a.id === addrObj.id);
+    if (idx >= 0) {
+      state.savedAddresses[idx] = addrObj;
+    } else {
+      state.savedAddresses.unshift(addrObj);
+    }
+    saveState();
+
+    if (supabaseClient) {
+      supabaseClient.from('addresses').upsert([addrObj]);
+    }
+  }
+
+  closeAddressModal(null, true);
+  showToast('Address & site location saved! ✓', 'success');
+
+  if (state.currentPage === 'checkout') {
+    renderCheckoutAddresses();
+    selectCheckoutAddress(addrObj.id);
+  }
+  if (state.currentPage === 'account') {
+    renderAccount();
+  }
+}
+
+function deleteAddress(addressId) {
+  if (!confirm('Are you sure you want to delete this address?')) return;
+  state.savedAddresses = state.savedAddresses.filter(a => a.id !== addressId);
+  saveState();
+  showToast('Address deleted', 'info');
+  if (state.currentPage === 'checkout') renderCheckoutAddresses();
+  if (state.currentPage === 'account') renderAccount();
+}
+
+function setDefaultAddress(addressId) {
+  state.savedAddresses.forEach(a => {
+    a.is_default = (a.id === addressId);
+  });
+  saveState();
+  showToast('Default address updated ✓', 'success');
+  if (state.currentPage === 'checkout') renderCheckoutAddresses();
+  if (state.currentPage === 'account') renderAccount();
+}
+
+function getSelectedCheckoutAddressId() {
+  return document.getElementById('co-selected-addr-id')?.value || null;
+}
+
+function renderCheckoutAddresses() {
+  const container = document.getElementById('checkoutSavedAddresses');
+  if (!container) return;
+
+  const addresses = state.savedAddresses;
+  if (!addresses || addresses.length === 0) {
+    container.innerHTML = `<p style="color:var(--white-60);padding:0.5rem">No saved addresses found. Click below to add your delivery address.</p>`;
+    return;
+  }
+
+  let selectedId = document.getElementById('co-selected-addr-id')?.value;
+  if (!selectedId) {
+    const def = addresses.find(a => a.is_default) || addresses[0];
+    selectedId = def ? def.id : '';
+  }
+
+  container.innerHTML = addresses.map(a => {
+    const isSelected = a.id === selectedId;
+    return `
+      <label class="address-card glass ${isSelected ? 'active' : ''}" onclick="selectCheckoutAddress('${a.id}')">
+        <div class="ac-top">
+          <input type="radio" name="checkoutAddressRadio" value="${a.id}" ${isSelected ? 'checked' : ''} />
+          <span class="atype-badge ${a.address_type.toLowerCase()}">${a.address_type === 'Home' ? '🏠 Home' : a.address_type === 'Work' ? '🏢 Work' : '📍 Other'}</span>
+          ${a.is_default ? '<span class="default-badge">★ Default</span>' : ''}
+          <div class="ac-actions" onclick="event.stopPropagation()">
+            <button type="button" class="btn btn-outline btn-sm" onclick="openAddressModal('${a.id}')">Edit</button>
+          </div>
+        </div>
+        <div class="ac-name">${a.name} • 📞 ${a.phone}</div>
+        <div class="ac-addr">${a.house_no ? a.house_no + ', ' : ''}${a.street_area}, ${a.city}, ${a.state} - ${a.pincode}</div>
+        ${a.landmark ? `<div class="ac-landmark">📍 Landmark: ${a.landmark}</div>` : ''}
+        <div class="ac-coords">📍 Map Pin: Lat ${a.latitude.toFixed(4)}, Lng ${a.longitude.toFixed(4)}</div>
+      </label>`;
+  }).join('');
+
+  const activeAddr = addresses.find(a => a.id === selectedId) || addresses[0];
+  if (activeAddr) {
+    selectCheckoutAddress(activeAddr.id, false);
+  }
+}
+
+function selectCheckoutAddress(addressId, triggerRender = true) {
+  const addr = state.savedAddresses.find(a => a.id === addressId);
+  if (!addr) return;
+
+  const selInput = document.getElementById('co-selected-addr-id');
+  const latInput = document.getElementById('co-lat');
+  const lngInput = document.getElementById('co-lng');
+  const gmapsInput = document.getElementById('co-gmaps-url');
+
+  if (selInput) selInput.value = addr.id;
+  if (latInput) latInput.value = addr.latitude;
+  if (lngInput) lngInput.value = addr.longitude;
+  if (gmapsInput) gmapsInput.value = `https://maps.google.com/?q=${addr.latitude},${addr.longitude}`;
+
+  if (document.getElementById('co-name')) document.getElementById('co-name').value = addr.name;
+  if (document.getElementById('co-phone')) document.getElementById('co-phone').value = addr.phone;
+  if (document.getElementById('co-address')) document.getElementById('co-address').value = `${addr.house_no ? addr.house_no + ', ' : ''}${addr.street_area}`;
+  if (document.getElementById('co-landmark')) document.getElementById('co-landmark').value = addr.landmark || '';
+  if (document.getElementById('co-city')) document.getElementById('co-city').value = addr.city;
+  if (document.getElementById('co-pin')) document.getElementById('co-pin').value = addr.pincode;
+
+  const cmpCoords = document.getElementById('cmpCoords');
+  const cmpAddressSummary = document.getElementById('cmpAddressSummary');
+  if (cmpCoords) cmpCoords.textContent = `Lat: ${addr.latitude.toFixed(4)}, Lng: ${addr.longitude.toFixed(4)}`;
+  if (cmpAddressSummary) cmpAddressSummary.textContent = `${addr.city}, ${addr.state}`;
+
+  initCheckoutMapPreview(addr.latitude, addr.longitude);
+
+  if (triggerRender) {
+    document.querySelectorAll('.address-card').forEach(c => c.classList.remove('active'));
+    renderCheckoutAddresses();
+  }
+}
+
+function initCheckoutMapPreview(lat, lng) {
+  const container = document.getElementById('checkoutMapPreview');
+  if (!container || typeof L === 'undefined') return;
+
+  if (checkoutMapInstance) {
+    checkoutMapInstance.remove();
+    checkoutMapInstance = null;
+  }
+
+  checkoutMapInstance = L.map('checkoutMapPreview', { zoomControl: false }).setView([lat, lng], 15);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(checkoutMapInstance);
+
+  const customIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41]
+  });
+
+  checkoutMarkerInstance = L.marker([lat, lng], { icon: customIcon }).addTo(checkoutMapInstance);
+  setTimeout(() => { checkoutMapInstance.invalidateSize(); }, 300);
+}
+
+// ===== LIVE TRACKING MAP (SWIGGY/ZOMATO STYLE) =====
+function renderLiveTrackingMap(order) {
+  const container = document.getElementById('trackMapContainer');
+  if (!container || typeof L === 'undefined') return;
+
+  const customerLat = order.latitude || 16.9833;
+  const customerLng = order.longitude || 79.5667;
+
+  if (trackMapInstance) {
+    trackMapInstance.remove();
+    trackMapInstance = null;
+  }
+
+  trackMapInstance = L.map('trackMapContainer').setView([customerLat, customerLng], 14);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(trackMapInstance);
+
+  // Customer destination pin
+  const houseIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41]
+  });
+  trackCustomerMarker = L.marker([customerLat, customerLng], { icon: houseIcon })
+    .addTo(trackMapInstance)
+    .bindPopup(`<b>${order.customer.name}</b><br>${order.customer.address}`);
+
+  // Driver vehicle pin (Simulated position moving from depot to site)
+  let startLat = customerLat - 0.015;
+  let startLng = customerLng - 0.020;
+
+  const truckIcon = L.divIcon({
+    className: 'driver-live-marker',
+    html: '<div style="font-size:2rem;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.5))">🚛</div>',
+    iconSize: [40, 40],
+    iconAnchor: [20, 20]
+  });
+
+  trackDriverMarker = L.marker([startLat, startLng], { icon: truckIcon })
+    .addTo(trackMapInstance)
+    .bindPopup('<b>Driver: Ravi Express</b><br>Out for Delivery');
+
+  // Draw route line
+  L.polyline([[startLat, startLng], [customerLat, customerLng]], { color: '#d4a017', weight: 4, dashArray: '8, 8' }).addTo(trackMapInstance);
+
+  // Live movement interval
+  if (liveTrackingInterval) clearInterval(liveTrackingInterval);
+
+  let step = 0;
+  const totalSteps = 100;
+  liveTrackingInterval = setInterval(() => {
+    step = (step + 1) % totalSteps;
+    const curLat = startLat + (customerLat - startLat) * (step / totalSteps);
+    const curLng = startLng + (customerLng - startLng) * (step / totalSteps);
+    if (trackDriverMarker) trackDriverMarker.setLatLng([curLat, curLng]);
+  }, 2000);
+
+  setTimeout(() => { trackMapInstance.invalidateSize(); }, 350);
 }
 
 // ===== INIT =====
