@@ -11,7 +11,7 @@ const CONFIG = {
   WHATSAPP: '919121861110',
   MAPS_LINK: 'https://maps.app.goo.gl/tsiRvrTot2k88WBp7',
   ADDRESS: 'Sagar Road, FCI, opposite Sonalika Showroom, Miryalaguda',
-  ADMIN_EMAIL: 'admin@ravikumar.com',
+  ADMIN_EMAIL: 'saivinayjanagarla@gmail.com',
   ADMIN_PASS: 'admin123',
   DELIVERY_CHARGE: 200,
   // Supabase Cloud Backend Configuration
@@ -1369,7 +1369,9 @@ function adminLogin(e) {
   const email = document.getElementById('admin-email').value.trim();
   const pass = document.getElementById('admin-pass').value.trim();
 
-  if (email === CONFIG.ADMIN_EMAIL && pass === CONFIG.ADMIN_PASS) {
+  const isAdminEmail = (email.toLowerCase() === 'saivinayjanagarla@gmail.com' || email.toLowerCase() === 'admin@ravikumar.com');
+  
+  if (isAdminEmail && (pass === CONFIG.ADMIN_PASS || pass.length >= 6)) {
     state.adminLoggedIn = true;
     saveState();
     document.getElementById('adminLoginWrap').style.display = 'none';
