@@ -1155,6 +1155,66 @@ function loginUser(e) {
   renderAccount();
 }
 
+function loginWithGoogle() {
+  if (supabaseClient) {
+    supabaseClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin
+      }
+    }).then(({ data, error }) => {
+      if (error) {
+        showToast(error.message, 'error');
+      }
+    });
+  } else {
+    showToast('Connecting to Google Auth...', 'info');
+  }
+}
+
+function loginUserFromModal(e) {
+  e.preventDefault();
+  const name = document.getElementById('w-name').value.trim();
+  const phone = document.getElementById('w-phone').value.trim();
+  const email = document.getElementById('w-email').value.trim();
+  const pass = document.getElementById('w-pass').value.trim();
+
+  if (phone.length < 10) { showToast('Enter valid phone number', 'error'); return; }
+
+  state.user = {
+    name,
+    phone,
+    email,
+    joinedAt: new Date().toISOString(),
+  };
+  saveState();
+
+  if (supabaseClient) {
+    supabaseClient.auth.signUp({
+      email,
+      password: pass,
+      options: { data: { name, phone } }
+    }).then(({ data: sData, error: sErr }) => {
+      if (sErr) console.warn('Supabase auth notice:', sErr.message);
+      else console.log('✅ Supabase Auth user created:', sData);
+    });
+
+    supabaseClient.from('users').upsert([
+      { name, phone, email, role: 'customer' }
+    ], { onConflict: 'phone' });
+  }
+
+  localStorage.setItem('hasSeenAuthModal', 'true');
+  closeModal('welcomeAuthModal');
+  showToast(`Welcome, ${name}! ✓`, 'success');
+  renderAccount();
+}
+
+function closeGuestAuthModal() {
+  localStorage.setItem('hasSeenAuthModal', 'true');
+  closeModal('welcomeAuthModal');
+}
+
 function logoutUser() {
   state.user = null;
   saveState();
@@ -1677,6 +1737,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (el) { el.min = minDate; el.value = minDate; }
     });
   }, 3200);
+
+  // Show Sign In Modal IMMEDIATELY on first visit (only once)
+  if (!state.user && !localStorage.getItem('hasSeenAuthModal')) {
+    const wModal = document.getElementById('welcomeAuthModal');
+    if (wModal) wModal.classList.add('active');
+  }
 
   // Slider scroll listener
   const slider = document.getElementById('productSlider');
