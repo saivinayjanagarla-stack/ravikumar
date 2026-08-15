@@ -1216,6 +1216,7 @@ ul { list-style: none; }
   padding: 1rem;
 }
 .modal-overlay.active { display: flex; }
+#welcomeAuthModal { z-index: 10001 !important; }
 /* Futuristic Neon Animated Border Login Card */
 .welcome-auth-card {
   position: relative;

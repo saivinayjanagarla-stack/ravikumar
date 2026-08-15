@@ -251,6 +251,10 @@ function hideSplash() {
   setTimeout(() => {
     splash.remove();
     initHeroCanvas();
+    if (!state.user) {
+      const wModal = document.getElementById('welcomeAuthModal');
+      if (wModal) wModal.classList.add('active');
+    }
   }, 700);
 }
 
