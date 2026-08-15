@@ -421,6 +421,10 @@ function navigate(page, extra) {
     renderMyOrders();
   } else if (page === 'account') {
     renderAccount();
+    if (!state.user) {
+      const wModal = document.getElementById('welcomeAuthModal');
+      if (wModal) wModal.classList.add('active');
+    }
   } else if (page === 'admin') {
     renderAdmin();
   } else if (page === 'success') {
@@ -1738,8 +1742,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }, 3200);
 
-  // Show Sign In Modal IMMEDIATELY on first visit (only once)
-  if (!state.user && !localStorage.getItem('hasSeenAuthModal')) {
+  // Show Sign In Modal IMMEDIATELY on first visit whenever user is not signed in
+  if (!state.user) {
     const wModal = document.getElementById('welcomeAuthModal');
     if (wModal) wModal.classList.add('active');
   }
