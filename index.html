@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ravikumar House Materials | Construction Materials &amp; Fast Delivery</title>
+  <meta name="description" content="Buy sand, dust, 40 MM kankara, 20 MM kankara, red bricks and cement bricks. Book water tanker and tractor services from Ravikumar House Materials." />
+  <meta property="og:title" content="Ravikumar House Materials | Construction Materials & Fast Delivery" />
+  <meta property="og:description" content="Premium construction materials delivered to your doorstep. Sand, Dust, Kankara, Bricks, Tractor & Water Tanker services." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "Ravikumar House Materials",
+    "description": "Construction materials supplier providing sand, dust, kankara, bricks, tractor and water tanker services.",
+    "telephone": "+91 9121861110",
+    "address": { "@type": "PostalAddress", "addressLocality": "Sagar Road, FCI, opposite Sonalika Showroom, Miryalaguda" }
+  }
+  </script>
+</head>
+<body>
+
+<!-- ===================== SPLASH SCREEN ===================== -->
+<div id="splash" class="splash">
+  <canvas id="splashCanvas"></canvas>
+  <div class="splash-content">
+    <div class="splash-logo-wrap">
+      <img src="logo.png" alt="Ravikumar House Materials Logo" class="splash-logo-img" />
+      <h1 class="splash-title">RAVI KUMAR</h1>
+      <h2 class="splash-subtitle">HOUSE MATERIALS</h2>
+      <p class="splash-tagline">BEST QUALITY • LOW PRICE • FAST DELIVERY</p>
+    </div>
+    <div class="splash-bar"><div class="splash-progress"></div></div>
+  </div>
+</div>
+
+<!-- ===================== DESKTOP NAVBAR ===================== -->
+<nav id="navbar" class="navbar glass">
+  <div class="nav-inner">
+    <a href="#home" class="nav-logo" onclick="navigate('home')">
+      <img src="logo.png" alt="Ravi Kumar Logo" class="nav-logo-img" />
+      <div class="logo-text">
+        <span class="logo-main">RAVI KUMAR</span>
+        <span class="logo-sub">HOUSE MATERIALS</span>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#home" onclick="navigate('home')" class="nav-link active" id="nl-home">Home</a></li>
+      <li><a href="#shop" onclick="navigate('shop')" class="nav-link" id="nl-shop">Materials</a></li>
+      <li><a href="#services" onclick="navigate('services')" class="nav-link" id="nl-services">Services</a></li>
+      <li><a href="#track" onclick="navigate('track')" class="nav-link" id="nl-track">Track Order</a></li>
+      <li><a href="#about" onclick="navigate('about')" class="nav-link" id="nl-about">About Us</a></li>
+      <li><a href="#contact" onclick="navigate('contact')" class="nav-link" id="nl-contact">Contact</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="nav-search-btn" onclick="toggleSearch()" title="Search">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </button>
+      <button class="nav-cart-btn" onclick="navigate('cart')" title="Cart">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span class="cart-badge" id="cartBadge">0</span>
+      </button>
+      <button class="nav-acc-btn" onclick="navigate('account')" title="Account">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+      <button class="nav-admin-btn" onclick="navigate('admin')" title="Admin">⚙️</button>
+    </div>
+  </div>
+  <!-- Search Bar -->
+  <div class="search-bar" id="searchBar">
+    <input type="text" id="searchInput" placeholder="Search building materials... (Sand, Bricks, Kankara...)" oninput="handleSearch(this.value)" />
+    <button onclick="toggleSearch()">✕</button>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+</nav>
+
+<!-- ===================== MAIN APP CONTAINER ===================== -->
+<main id="app">
+
+  <!-- =========== HOME PAGE =========== -->
+  <section id="page-home" class="page active">
+
+    <!-- HERO -->
+    <div class="hero">
+      <canvas id="heroCanvas" class="hero-canvas"></canvas>
+      <div class="hero-content">
+        <div class="hero-badge">🏗️ Construction Materials Supplier</div>
+        <h1 class="hero-title">
+          <span class="hero-title-main">RAVIKUMAR</span>
+          <span class="hero-title-sub">HOUSE MATERIALS</span>
+        </h1>
+        <p class="hero-desc">Construction Materials Delivered to Your Doorstep</p>
+        <div class="hero-tagline-anim" id="heroTagline">
+          <span class="tagline-word active">BEST QUALITY</span>
+          <span class="tagline-word">LOW PRICE</span>
+          <span class="tagline-word">FAST DELIVERY</span>
+        </div>
+        <div class="hero-btns">
+          <button class="btn btn-primary hero-btn" onclick="navigate('shop')">
+            <span>🏗️</span> SHOP MATERIALS
+          </button>
+          <button class="btn btn-secondary hero-btn" onclick="navigate('services')">
+            <span>📅</span> BOOK DELIVERY
+          </button>
+          <button class="btn btn-outline hero-btn" onclick="navigate('contact')">
+            <span>📞</span> CONTACT US
+          </button>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="stat-num">6+</span>
+            <span class="stat-label">Materials</span>
+          </div>
+          <div class="hero-stat">
+            <span class="stat-num">100%</span>
+            <span class="stat-label">Quality</span>
+          </div>
+          <div class="hero-stat">
+            <span class="stat-num">Fast</span>
+            <span class="stat-label">Delivery</span>
+          </div>
+          <div class="hero-stat">
+            <span class="stat-num">2</span>
+            <span class="stat-label">Services</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-scroll-hint">
+        <div class="scroll-arrow"></div>
+        <span>Scroll to explore</span>
+      </div>
+    </div>
+
+    <!-- BRAND ANIMATION STRIP -->
+    <div class="brand-strip">
+      <div class="brand-strip-inner">
+        <div class="brand-item">⭐ BEST QUALITY</div>
+        <div class="brand-sep">•</div>
+        <div class="brand-item">💰 LOW PRICE</div>
+        <div class="brand-sep">•</div>
+        <div class="brand-item">🚚 FAST DELIVERY</div>
+        <div class="brand-sep">•</div>
+        <div class="brand-item">🏗️ TRUSTED SERVICE</div>
+        <div class="brand-sep">•</div>
+        <div class="brand-item">⭐ BEST QUALITY</div>
+        <div class="brand-sep">•</div>
+        <div class="brand-item">💰 LOW PRICE</div>
+        <div class="brand-sep">•</div>
+        <div class="brand-item">🚚 FAST DELIVERY</div>
+        <div class="brand-sep">•</div>
+        <div class="brand-item">🏗️ TRUSTED SERVICE</div>
+        <div class="brand-sep">•</div>
+      </div>
+    </div>
+
+    <!-- SPECIAL BRAND SECTION -->
+    <div class="brand-section reveal">
+      <div class="brand-section-bg">
+        <div class="brand-section-vehicles">
+          <div class="vehicle-anim tractor-anim"><span class="vehicle-inner">🚜</span></div>
+          <div class="vehicle-anim truck-anim"><span class="vehicle-inner">🚛</span></div>
+        </div>
+        <div class="brand-section-materials">
+          <div class="material-float m1">🧱</div>
+          <div class="material-float m2">⛏️</div>
+          <div class="material-float m3">🏔️</div>
+        </div>
+      </div>
+      <div class="container">
+        <div class="brand-words">
+          <div class="brand-word-card reveal-left active">
+            <div class="bwc-icon">⭐</div>
+            <h2>BEST QUALITY</h2>
+            <p>Premium construction materials sourced from trusted suppliers</p>
+          </div>
+          <div class="brand-word-card reveal-up">
+            <div class="bwc-icon">💰</div>
+            <h2>LOW PRICE</h2>
+            <p>Competitive rates that keep your construction budget in check</p>
+          </div>
+          <div class="brand-word-card reveal-right">
+            <div class="bwc-icon">🚚</div>
+            <h2>FAST DELIVERY</h2>
+            <p>Same-day and next-day delivery options to your construction site</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUCT SLIDER -->
+    <div class="section products-section reveal">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">Our Materials</div>
+          <h2 class="section-title">Construction Materials</h2>
+          <p class="section-desc">Premium quality building materials delivered to your site</p>
+        </div>
+        <div class="product-slider-wrap">
+          <button class="slider-btn slider-prev" onclick="slideProducts(-1)">‹</button>
+          <div class="product-slider" id="productSlider">
+            <!-- Injected by JS -->
+          </div>
+          <button class="slider-btn slider-next" onclick="slideProducts(1)">›</button>
+        </div>
+        <div class="slider-dots" id="sliderDots"></div>
+        <div class="section-cta">
+          <button class="btn btn-primary" onclick="navigate('shop')">View All Materials →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SERVICES SECTION -->
+    <div class="section services-home-section reveal">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">Our Services</div>
+          <h2 class="section-title">Book a Service</h2>
+          <p class="section-desc">Professional tractor and water tanker services at your doorstep</p>
+        </div>
+        <div class="services-cards">
+          <div class="service-card glass tilt-card reveal-left">
+            <div class="sc-icon">🚜</div>
+            <h3>Tractor Service</h3>
+            <p>Book a tractor for material transportation, leveling, and construction work at your site.</p>
+            <ul class="sc-features">
+              <li>✓ Experienced drivers</li>
+              <li>✓ Flexible scheduling</li>
+              <li>✓ Construction support</li>
+            </ul>
+            <button class="btn btn-primary" onclick="navigate('tractor')">Book Tractor →</button>
+          </div>
+          <div class="service-card glass tilt-card reveal-right">
+            <div class="sc-icon">🚰</div>
+            <h3>Water Tanker Service</h3>
+            <p>Order water tanker delivery for construction work, dust suppression, and site preparation.</p>
+            <ul class="sc-features">
+              <li>✓ Prompt delivery</li>
+              <li>✓ Multiple capacities</li>
+              <li>✓ Site-ready water</li>
+            </ul>
+            <button class="btn btn-primary" onclick="navigate('tanker')">Book Tanker →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WHY CHOOSE US -->
+    <div class="section why-section reveal">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">Why Us</div>
+          <h2 class="section-title">Why Choose Ravikumar?</h2>
+        </div>
+        <div class="why-grid">
+          <div class="why-card glass tilt-card reveal">
+            <div class="why-icon">⭐</div>
+            <h3>Best Quality</h3>
+            <p>Quality materials for house construction — tested and verified for building standards.</p>
+          </div>
+          <div class="why-card glass tilt-card reveal">
+            <div class="why-icon">💰</div>
+            <h3>Low Price</h3>
+            <p>Competitive prices with no hidden charges. Get the best value for your construction budget.</p>
+          </div>
+          <div class="why-card glass tilt-card reveal">
+            <div class="why-icon">🚚</div>
+            <h3>Fast Delivery</h3>
+            <p>Fast material delivery directly to your construction site. Same-day options available.</p>
+          </div>
+          <div class="why-card glass tilt-card reveal">
+            <div class="why-icon">🤝</div>
+            <h3>Trusted Service</h3>
+            <p>Reliable construction material supply with professional drivers and on-time service.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DELIVERY PROCESS -->
+    <div class="section process-section reveal">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">How It Works</div>
+          <h2 class="section-title">Delivery Process</h2>
+          <p class="section-desc">Simple steps from order to doorstep delivery</p>
+        </div>
+        <div class="process-steps">
+          <div class="process-step reveal">
+            <div class="ps-num">01</div>
+            <div class="ps-icon">📱</div>
+            <h3>Order Material</h3>
+            <p>Select your construction material and place your order online</p>
+            <div class="ps-connector"></div>
+          </div>
+          <div class="process-step reveal">
+            <div class="ps-num">02</div>
+            <div class="ps-icon">✅</div>
+            <h3>Order Confirmed</h3>
+            <p>Admin confirms your order and schedules delivery</p>
+            <div class="ps-connector"></div>
+          </div>
+          <div class="process-step reveal">
+            <div class="ps-num">03</div>
+            <div class="ps-icon">⚙️</div>
+            <h3>Material Loaded</h3>
+            <p>Materials are prepared, measured and loaded on vehicle</p>
+            <div class="ps-connector"></div>
+          </div>
+          <div class="process-step reveal">
+            <div class="ps-num">04</div>
+            <div class="ps-icon">🚛</div>
+            <h3>Out for Delivery</h3>
+            <p>Truck / tractor travels to your construction site</p>
+            <div class="ps-connector"></div>
+          </div>
+          <div class="process-step reveal">
+            <div class="ps-num">05</div>
+            <div class="ps-icon">🏠</div>
+            <h3>Delivered!</h3>
+            <p>Materials arrive at your location — ready to build!</p>
+          </div>
+        </div>
+        <div class="process-vehicle-anim">
+          <div class="road-line"></div>
+          <div class="moving-truck">🚛</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABOUT SECTION -->
+    <div class="section about-section reveal" id="about-anchor">
+      <div class="container">
+        <div class="about-grid">
+          <div class="about-visual reveal-left">
+            <div class="about-visual-inner">
+              <div class="about-construction-art">
+                <div class="aca-item brick1">🧱</div>
+                <div class="aca-item sand1">🏔️</div>
+                <div class="aca-item truck1">🚛</div>
+                <div class="aca-item tractor1">🚜</div>
+                <div class="aca-item water1">🚰</div>
+                <div class="aca-item house1">🏗️</div>
+              </div>
+              <div class="about-badge-float">
+                <span>🌟</span>
+                <div>
+                  <strong>Premium Quality</strong>
+                  <small>Guaranteed</small>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="about-content reveal-right">
+            <div class="section-tag">About Us</div>
+            <h2 class="section-title">About Ravikumar House Materials</h2>
+            <p>We are a dedicated construction materials supply and delivery business committed to providing the highest quality building materials for your home construction and building projects.</p>
+            <p>From premium sand and gravel to red bricks, cement blocks, and professional tractor and water tanker services — we are your complete construction materials partner.</p>
+            <div class="about-highlights">
+              <div class="ah-item">
+                <div class="ah-icon">⭐</div>
+                <div>
+                  <strong>Quality Materials</strong>
+                  <small>Sourced from trusted suppliers</small>
+                </div>
+              </div>
+              <div class="ah-item">
+                <div class="ah-icon">💰</div>
+                <div>
+                  <strong>Affordable Pricing</strong>
+                  <small>Best rates in the market</small>
+                </div>
+              </div>
+              <div class="ah-item">
+                <div class="ah-icon">🚚</div>
+                <div>
+                  <strong>Fast Delivery</strong>
+                  <small>Delivered to your site</small>
+                </div>
+              </div>
+              <div class="ah-item">
+                <div class="ah-icon">🤝</div>
+                <div>
+                  <strong>Reliable Service</strong>
+                  <small>Professional and trustworthy</small>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="navigate('contact')">Contact Us →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GOOGLE MAPS -->
+    <div class="section maps-section reveal">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">Location</div>
+          <h2 class="section-title">Find Us</h2>
+        </div>
+        <div class="maps-wrap glass">
+          <div class="maps-info">
+            <div class="maps-icon">📍</div>
+            <h3>Ravikumar House Materials</h3>
+            <p>Sagar Road, FCI, opposite Sonalika Showroom, Miryalaguda</p>
+            <p>📞 +91 9121861110</p>
+            <a href="https://maps.app.goo.gl/tsiRvrTot2k88WBp7" target="_blank" class="btn btn-primary maps-btn">
+              📍 Open in Google Maps
+            </a>
+          </div>
+          <div class="maps-embed">
+            <div class="maps-placeholder">
+              <div class="maps-ph-icon">🗺️</div>
+              <p>Miryalaguda, Telangana</p>
+              <small>Sagar Road, FCI, opposite Sonalika Showroom</small>
+              <a href="https://maps.app.goo.gl/tsiRvrTot2k88WBp7" target="_blank" class="btn btn-outline btn-sm">Open Maps →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-top">
+        <div class="container footer-grid">
+          <div class="footer-brand">
+            <div class="footer-logo">
+              <img src="logo.png" alt="Ravi Kumar Logo" class="footer-logo-img" />
+              <div>
+                <strong>RAVI KUMAR</strong>
+                <small>HOUSE MATERIALS</small>
+              </div>
+            </div>
+            <p>Construction Materials & Delivery Services</p>
+            <p class="footer-tagline">BEST QUALITY • LOW PRICE • FAST DELIVERY</p>
+            <div class="footer-socials">
+              <a href="https://wa.me/919121861110?text=Hello%2C%20I%20want%20to%20enquire%20about%20construction%20materials%20from%20Ravikumar%20House%20Materials." target="_blank" class="footer-social whatsapp">💬 WhatsApp</a>
+              <a href="tel:9121861110" class="footer-social phone">📞 Call</a>
+              <a href="https://maps.app.goo.gl/tsiRvrTot2k88WBp7" target="_blank" class="footer-social maps">📍 Maps</a>
+            </div>
+          </div>
+          <div class="footer-col">
+            <h4>Navigation</h4>
+            <ul>
+              <li><a href="#home" onclick="navigate('home')">Home</a></li>
+              <li><a href="#shop" onclick="navigate('shop')">Materials</a></li>
+              <li><a href="#services" onclick="navigate('services')">Services</a></li>
+              <li><a href="#track" onclick="navigate('track')">Track Order</a></li>
+              <li><a href="#about" onclick="navigate('about')">About Us</a></li>
+              <li><a href="#contact" onclick="navigate('contact')">Contact</a></li>
+              <li><a href="#admin" onclick="navigate('admin')" style="color:var(--gold);font-weight:700">⚙️ Admin Panel</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Materials</h4>
+            <ul>
+              <li><a href="#shop" onclick="navigate('shop')">Sand (ఇసుక)</a></li>
+              <li><a href="#shop" onclick="navigate('shop')">Dust</a></li>
+              <li><a href="#shop" onclick="navigate('shop')">40 MM Kankara</a></li>
+              <li><a href="#shop" onclick="navigate('shop')">20 MM Kankara</a></li>
+              <li><a href="#shop" onclick="navigate('shop')">Red Bricks</a></li>
+              <li><a href="#shop" onclick="navigate('shop')">Cement Bricks</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Account</h4>
+            <ul>
+              <li><a href="#account" onclick="navigate('account')">My Account</a></li>
+              <li><a href="#cart" onclick="navigate('cart')">My Cart</a></li>
+              <li><a href="#orders" onclick="navigate('orders')">My Orders</a></li>
+              <li><a href="#tractor" onclick="navigate('tractor')">Book Tractor</a></li>
+              <li><a href="#tanker" onclick="navigate('tanker')">Book Tanker</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="container">
+          <p>© 2026 Ravikumar House Materials. All Rights Reserved.</p>
+          <div class="footer-legal">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms & Conditions</a>
+            <a href="#admin" onclick="navigate('admin')" style="color:var(--gold);font-weight:600">⚙️ Admin Login</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </section>
+
+  <!-- =========== SHOP PAGE =========== -->
+  <section id="page-shop" class="page">
+    <div class="page-hero shop-hero">
+      <div class="container">
+        <div class="section-tag">Our Products</div>
+        <h1>Construction Materials</h1>
+        <p>Premium quality building materials for your construction project</p>
+      </div>
+    </div>
+    <div class="container shop-container">
+      <div class="shop-filters glass">
+        <div class="filter-group">
+          <label>Category</label>
+          <select id="filterCategory" onchange="filterProducts()">
+            <option value="all">All Materials</option>
+            <option value="aggregate">Aggregates</option>
+            <option value="brick">Bricks</option>
+            <option value="sand">Sand & Dust</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Sort By</label>
+          <select id="filterSort" onchange="filterProducts()">
+            <option value="default">Default</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="popular">Most Popular</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Availability</label>
+          <select id="filterAvail" onchange="filterProducts()">
+            <option value="all">All</option>
+            <option value="available">In Stock</option>
+          </select>
+        </div>
+      </div>
+      <div class="products-grid" id="shopGrid">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- =========== PRODUCT DETAIL PAGE =========== -->
+  <section id="page-product" class="page">
+    <div class="container product-detail-wrap" id="productDetail">
+      <!-- Injected by JS -->
+    </div>
+  </section>
+
+  <!-- =========== CART PAGE =========== -->
+  <section id="page-cart" class="page">
+    <div class="container">
+      <div class="page-title-row">
+        <h1>🛒 Your Material Cart</h1>
+        <button class="btn btn-outline btn-sm" onclick="navigate('shop')">← Continue Shopping</button>
+      </div>
+      <div id="cartContent"><!-- Injected by JS --></div>
+    </div>
+  </section>
+
+  <!-- =========== CHECKOUT PAGE =========== -->
+  <section id="page-checkout" class="page">
+    <div class="container checkout-wrap">
+      <h1>📦 Checkout</h1>
+      <div class="checkout-grid">
+        <div class="checkout-form-col">
+          <div class="checkout-section glass">
+            <h3>Delivery Information</h3>
+            <form id="checkoutForm" onsubmit="placeOrder(event)">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Full Name *</label>
+                  <input type="text" id="co-name" placeholder="Enter your full name" required />
+                </div>
+                <div class="form-group">
+                  <label>Mobile Number *</label>
+                  <input type="tel" id="co-phone" placeholder="10-digit mobile number" required />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Delivery Address *</label>
+                <textarea id="co-address" placeholder="Full delivery address" rows="2" required></textarea>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Landmark</label>
+                  <input type="text" id="co-landmark" placeholder="Near landmark" />
+                </div>
+                <div class="form-group">
+                  <label>City *</label>
+                  <input type="text" id="co-city" placeholder="City" required />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Pincode *</label>
+                  <input type="text" id="co-pin" placeholder="Pincode" required />
+                </div>
+                <div class="form-group">
+                  <label>Delivery Date *</label>
+                  <input type="date" id="co-date" required />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Preferred Delivery Time</label>
+                <select id="co-time">
+                  <option>Morning (8 AM - 12 PM)</option>
+                  <option>Afternoon (12 PM - 4 PM)</option>
+                  <option>Evening (4 PM - 7 PM)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Additional Notes</label>
+                <textarea id="co-notes" placeholder="Any special instructions..." rows="2"></textarea>
+              </div>
+              <h3 style="margin-top:1.5rem">Payment Method</h3>
+              <div class="payment-options">
+                <label class="pay-opt active" id="pay-upi" onclick="selectPayment('upi')">
+                  <input type="radio" name="payment" value="upi" checked /> 📱 UPI
+                </label>
+                <label class="pay-opt" id="pay-card" onclick="selectPayment('card')">
+                  <input type="radio" name="payment" value="card" /> 💳 Card
+                </label>
+                <label class="pay-opt" id="pay-net" onclick="selectPayment('net')">
+                  <input type="radio" name="payment" value="net" /> 🏦 Net Banking
+                </label>
+                <label class="pay-opt" id="pay-cod" onclick="selectPayment('cod')">
+                  <input type="radio" name="payment" value="cod" /> 💵 Pay on Delivery
+                </label>
+              </div>
+              <button type="submit" class="btn btn-primary btn-full btn-lg pay-btn">
+                <span>💳</span> PAY &amp; PLACE ORDER
+              </button>
+            </form>
+          </div>
+        </div>
+        <div class="checkout-summary-col">
+          <div class="checkout-summary glass" id="checkoutSummary">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========== ORDER SUCCESS =========== -->
+  <section id="page-success" class="page">
+    <div class="container success-wrap">
+      <div class="success-card glass">
+        <div class="success-animation">
+          <div class="success-checkmark" id="successCheck">✅</div>
+          <div class="success-confetti" id="confettiWrap"></div>
+        </div>
+        <h1>ORDER PLACED SUCCESSFULLY!</h1>
+        <p>Thank you for choosing Ravikumar House Materials.</p>
+        <div class="success-details" id="successDetails"><!-- Injected by JS --></div>
+        <div class="success-actions">
+          <button class="btn btn-primary" onclick="navigate('track')">📦 Track Order</button>
+          <button class="btn btn-outline" onclick="navigate('shop')">🏗️ Continue Shopping</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========== TRACK ORDER =========== -->
+  <section id="page-track" class="page">
+    <div class="container">
+      <div class="page-hero-sm">
+        <h1>📦 Track Your Order</h1>
+        <p>Real-time order status tracking</p>
+      </div>
+      <div class="track-search glass">
+        <input type="text" id="trackInput" placeholder="Enter Order ID (e.g. RHM-2026-001)" />
+        <button class="btn btn-primary" onclick="trackOrder()">Track Now</button>
+      </div>
+      <div id="trackResult"><!-- Injected by JS --></div>
+      <div id="myOrders" class="my-orders-wrap"><!-- Injected by JS --></div>
+    </div>
+  </section>
+
+  <!-- =========== ORDERS PAGE =========== -->
+  <section id="page-orders" class="page">
+    <div class="container">
+      <h1>📋 My Orders</h1>
+      <div id="ordersContent"><!-- Injected by JS --></div>
+    </div>
+  </section>
+
+  <!-- =========== SERVICES PAGE =========== -->
+  <section id="page-services" class="page">
+    <div class="page-hero shop-hero">
+      <div class="container">
+        <div class="section-tag">Services</div>
+        <h1>Our Services</h1>
+        <p>Professional tractor and water tanker services</p>
+      </div>
+    </div>
+    <div class="container">
+      <div class="services-full-grid">
+        <div class="service-full-card glass tilt-card">
+          <div class="sfc-header">
+            <div class="sfc-icon">🚜</div>
+            <div>
+              <h2>Tractor Service</h2>
+              <p>Professional tractor booking</p>
+            </div>
+          </div>
+          <div class="sfc-features">
+            <div class="sfcf">✓ Experienced operators</div>
+            <div class="sfcf">✓ Multiple tractor types</div>
+            <div class="sfcf">✓ Construction site ready</div>
+            <div class="sfcf">✓ Flexible scheduling</div>
+          </div>
+          <button class="btn btn-primary" onclick="navigate('tractor')">Book Tractor Service →</button>
+        </div>
+        <div class="service-full-card glass tilt-card">
+          <div class="sfc-header">
+            <div class="sfc-icon">🚰</div>
+            <div>
+              <h2>Water Tanker Service</h2>
+              <p>Water delivery for construction</p>
+            </div>
+          </div>
+          <div class="sfc-features">
+            <div class="sfcf">✓ Prompt delivery</div>
+            <div class="sfcf">✓ Multiple tank capacities</div>
+            <div class="sfcf">✓ Construction-grade water</div>
+            <div class="sfcf">✓ Same-day options</div>
+          </div>
+          <button class="btn btn-primary" onclick="navigate('tanker')">Book Water Tanker →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========== TRACTOR BOOKING =========== -->
+  <section id="page-tractor" class="page">
+    <div class="container booking-wrap">
+      <div class="booking-header">
+        <div class="booking-icon">🚜</div>
+        <h1>Book Tractor Service</h1>
+        <p>Fill in your details and we'll get back to you</p>
+      </div>
+      <form class="booking-form glass" id="tractorForm" onsubmit="bookService(event,'tractor')">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Your Name *</label>
+            <input type="text" id="tr-name" placeholder="Full name" required />
+          </div>
+          <div class="form-group">
+            <label>Phone Number *</label>
+            <input type="tel" id="tr-phone" placeholder="Mobile number" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Address *</label>
+          <textarea id="tr-address" placeholder="Full address / construction site address" rows="2" required></textarea>
+        </div>
+        <div class="form-group">
+          <label>Location / Landmark</label>
+          <input type="text" id="tr-location" placeholder="Nearby landmark or location" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Service Date *</label>
+            <input type="date" id="tr-date" required />
+          </div>
+          <div class="form-group">
+            <label>Time *</label>
+            <input type="time" id="tr-time" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Service Duration</label>
+            <select id="tr-duration">
+              <option>Half Day (4 hours)</option>
+              <option>Full Day (8 hours)</option>
+              <option>Custom</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Requirements</label>
+            <input type="text" id="tr-req" placeholder="e.g. Material transport, leveling" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Additional Notes</label>
+          <textarea id="tr-notes" placeholder="Any specific requirements..." rows="2"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg">
+          🚜 BOOK TRACTOR
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- =========== WATER TANKER BOOKING =========== -->
+  <section id="page-tanker" class="page">
+    <div class="container booking-wrap">
+      <div class="booking-header">
+        <div class="booking-icon">🚰</div>
+        <h1>Book Water Tanker</h1>
+        <p>Water delivery to your construction site</p>
+      </div>
+      <form class="booking-form glass" id="tankerForm" onsubmit="bookService(event,'tanker')">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Customer Name *</label>
+            <input type="text" id="tk-name" placeholder="Full name" required />
+          </div>
+          <div class="form-group">
+            <label>Phone Number *</label>
+            <input type="tel" id="tk-phone" placeholder="Mobile number" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Delivery Address *</label>
+          <textarea id="tk-address" placeholder="Full delivery address" rows="2" required></textarea>
+        </div>
+        <div class="form-group">
+          <label>Location / Landmark</label>
+          <input type="text" id="tk-location" placeholder="Nearby landmark" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tanker Requirement</label>
+            <select id="tk-type">
+              <option>5,000 Litres</option>
+              <option>10,000 Litres</option>
+              <option>15,000 Litres</option>
+              <option>Custom Quantity</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Quantity (if multiple trips)</label>
+            <input type="number" id="tk-qty" placeholder="No. of tankers" min="1" value="1" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Delivery Date *</label>
+            <input type="date" id="tk-date" required />
+          </div>
+          <div class="form-group">
+            <label>Delivery Time *</label>
+            <input type="time" id="tk-time" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea id="tk-notes" placeholder="Any special instructions..." rows="2"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg">
+          🚰 BOOK WATER TANKER
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- =========== ACCOUNT PAGE =========== -->
+  <section id="page-account" class="page">
+    <div class="container account-wrap">
+      <div id="accountContent"><!-- Injected by JS --></div>
+    </div>
+  </section>
+
+  <!-- =========== CONTACT PAGE =========== -->
+  <section id="page-contact" class="page">
+    <div class="container contact-wrap">
+      <div class="page-hero-sm">
+        <h1>📞 Contact Us</h1>
+        <p>Get in touch with Ravikumar House Materials</p>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-info glass">
+          <h3>Contact Information</h3>
+          <div class="ci-item">
+            <span class="ci-icon">📞</span>
+            <div>
+              <strong>Phone</strong>
+              <a href="tel:9121861110">+91 9121861110</a>
+            </div>
+          </div>
+          <div class="ci-item">
+            <span class="ci-icon">💬</span>
+            <div>
+              <strong>WhatsApp</strong>
+              <a href="https://wa.me/919121861110?text=Hello%2C%20I%20want%20to%20enquire%20about%20construction%20materials%20from%20Ravikumar%20House%20Materials." target="_blank">Chat on WhatsApp</a>
+            </div>
+          </div>
+          <div class="ci-item">
+            <span class="ci-icon">📍</span>
+            <div>
+              <strong>Address</strong>
+              <span>Sagar Road, FCI, opposite Sonalika Showroom, Miryalaguda</span>
+            </div>
+          </div>
+          <div class="ci-item">
+            <span class="ci-icon">🕐</span>
+            <div>
+              <strong>Working Hours</strong>
+              <span>Mon–Sat: 8 AM – 7 PM</span>
+            </div>
+          </div>
+          <div class="contact-actions">
+            <a href="tel:9121861110" class="btn btn-primary">📞 Call Now</a>
+            <a href="https://wa.me/919121861110?text=Hello%2C%20I%20want%20to%20enquire%20about%20construction%20materials%20from%20Ravikumar%20House%20Materials." target="_blank" class="btn btn-whatsapp">💬 WhatsApp</a>
+          </div>
+        </div>
+        <div class="contact-form glass">
+          <h3>Send Message</h3>
+          <form onsubmit="sendContactMsg(event)">
+            <div class="form-group">
+              <label>Your Name</label>
+              <input type="text" id="ct-name" placeholder="Full name" required />
+            </div>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="tel" id="ct-phone" placeholder="Mobile number" required />
+            </div>
+            <div class="form-group">
+              <label>Message</label>
+              <textarea id="ct-msg" placeholder="Your enquiry about materials or services..." rows="4" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">Send Message</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========== ADMIN LOGIN =========== -->
+  <section id="page-admin" class="page">
+    <div class="admin-login-wrap" id="adminLoginWrap">
+      <div class="admin-login-card glass">
+        <div class="admin-login-logo">
+          <span>🔐</span>
+          <h2>Admin Panel</h2>
+          <p>Ravikumar House Materials</p>
+        </div>
+        <form onsubmit="adminLogin(event)">
+          <div class="form-group">
+            <label>Admin Email</label>
+            <input type="email" id="admin-email" placeholder="admin@ravikumar.com" required />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="admin-pass" placeholder="Enter password" required />
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Login to Dashboard</button>
+        </form>
+        <p class="admin-hint">Default: admin@ravikumar.com / admin123</p>
+      </div>
+    </div>
+    <div class="admin-dashboard" id="adminDashboard" style="display:none">
+      <!-- Injected by JS -->
+    </div>
+  </section>
+
+  <!-- =========== 404 PAGE =========== -->
+  <section id="page-404" class="page">
+    <div class="container notfound-wrap">
+      <div class="notfound-icon">🔍</div>
+      <h1>Page Not Found</h1>
+      <p>The page you're looking for doesn't exist.</p>
+      <button class="btn btn-primary" onclick="navigate('home')">← Back to Home</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===================== MOBILE BOTTOM NAV ===================== -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="bnav-item active" id="bn-home" onclick="navigate('home')">
+    <div class="bnav-icon">🏠</div>
+    <span>Home</span>
+  </button>
+  <button class="bnav-item" id="bn-shop" onclick="navigate('shop')">
+    <div class="bnav-icon">🏗️</div>
+    <span>Shop</span>
+  </button>
+  <button class="bnav-item" id="bn-cart" onclick="navigate('cart')">
+    <div class="bnav-icon">🛒<span class="bnav-badge" id="bnCartBadge">0</span></div>
+    <span>Cart</span>
+  </button>
+  <button class="bnav-item" id="bn-orders" onclick="navigate('orders')">
+    <div class="bnav-icon">📦</div>
+    <span>Orders</span>
+  </button>
+  <button class="bnav-item" id="bn-account" onclick="navigate('account')">
+    <div class="bnav-icon">👤</div>
+    <span>Account</span>
+  </button>
+</nav>
+
+<!-- ===================== FLOATING BUTTONS ===================== -->
+<div class="floating-btns">
+  <a href="https://wa.me/919121861110?text=Hello%2C%20I%20want%20to%20enquire%20about%20construction%20materials%20from%20Ravikumar%20House%20Materials." target="_blank" class="float-btn whatsapp-float" title="Chat on WhatsApp">
+    💬
+    <span class="float-label">WhatsApp</span>
+  </a>
+  <a href="tel:9121861110" class="float-btn call-float" title="Call Now">
+    📞
+    <span class="float-label">Call Now</span>
+  </a>
+  <a href="https://maps.app.goo.gl/tsiRvrTot2k88WBp7" target="_blank" class="float-btn maps-float" title="Location">
+    📍
+    <span class="float-label">Location</span>
+  </a>
+</div>
+
+<!-- ===================== TOAST NOTIFICATION ===================== -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ===================== PRODUCT MODAL ===================== -->
+<div class="modal-overlay" id="productModal" onclick="closeProductModal(event)">
+  <div class="product-modal glass" id="productModalContent">
+    <!-- Injected by JS -->
+  </div>
+</div>
+
+<!-- ===================== BOOKING SUCCESS MODAL ===================== -->
+<div class="modal-overlay" id="bookingSuccessModal" onclick="closeModal('bookingSuccessModal')">
+  <div class="booking-success-modal glass">
+    <div class="bsm-icon">✅</div>
+    <h2>Booking Confirmed!</h2>
+    <p id="bookingSuccessMsg"></p>
+    <button class="btn btn-primary" onclick="closeModal('bookingSuccessModal')">Done</button>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
