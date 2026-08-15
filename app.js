@@ -251,7 +251,7 @@ function hideSplash() {
   setTimeout(() => {
     splash.remove();
     initHeroCanvas();
-    if (!state.user) {
+    if (!sessionStorage.getItem('dismissed_auth')) {
       const wModal = document.getElementById('welcomeAuthModal');
       if (wModal) wModal.classList.add('active');
     }
@@ -1212,14 +1212,14 @@ function loginUserFromModal(e) {
     ], { onConflict: 'phone' });
   }
 
-  localStorage.setItem('hasSeenAuthModal', 'true');
+  sessionStorage.setItem('dismissed_auth', 'true');
   closeModal('welcomeAuthModal');
   showToast(`Welcome, ${name}! ✓`, 'success');
   renderAccount();
 }
 
 function closeGuestAuthModal() {
-  localStorage.setItem('hasSeenAuthModal', 'true');
+  sessionStorage.setItem('dismissed_auth', 'true');
   closeModal('welcomeAuthModal');
 }
 
@@ -1746,8 +1746,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }, 3200);
 
-  // Show Sign In Modal IMMEDIATELY on first visit whenever user is not signed in
-  if (!state.user) {
+  // Show Sign In Modal IMMEDIATELY on new visit
+  if (!sessionStorage.getItem('dismissed_auth')) {
     const wModal = document.getElementById('welcomeAuthModal');
     if (wModal) wModal.classList.add('active');
   }
