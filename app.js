@@ -1220,7 +1220,11 @@ function loginUserFromModal(e) {
 
 function closeGuestAuthModal() {
   sessionStorage.setItem('dismissed_auth', 'true');
-  closeModal('welcomeAuthModal');
+  const modal = document.getElementById('welcomeAuthModal');
+  if (modal) {
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+  }
 }
 
 function logoutUser() {
